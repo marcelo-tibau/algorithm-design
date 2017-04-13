@@ -1,8 +1,20 @@
-### Implementação do Algoritmo Dijkstra, que mede o caminho mais curto.
-# Essa implementação segue as especificações dadas no livro "Algorithm Design" de Jon Kleinberg e Eva Tardos.
+---
+title: "Dijkstra_Test_2"
+author: "Marcelo Tibau"
+date: "10 de abril de 2017"
+output: html_document
+---
 
-# Criação de uma lista de adjacência com dados:
+## Introdução
+Implementação do Algoritmo Dijkstra, que mede o caminho mais curto. Essa implementação segue as especificações dadas no livro "Algorithm Design" de Jon Kleinberg e Eva Tardos.
 
+*Referência:* Kleinberg, Jon; Tardos, Eva. "Algorithm Design". Pearson. 2005. p.137-142.
+
+## Passo a passo da implementação
+
+Criação de uma lista de adjacência com dados:
+
+```{r}
 edgesdf <- data.frame(nodea=c(1,2,4,2,1), nodeb=c(1,2,3,4,5))
 
 adjalist <- by(edgesdf, edgesdf$nodea, function(x) x$nodeb)
@@ -14,58 +26,57 @@ for(i in as.character(unique(edgesdf$nodea))) {
 
 myadj <- stack(adjalist) 
 
+```
 
-# criação do grafo com base na lista de adjacência usando a biblioteca 'igraph' em R.
+
+Criação do grafo com base na lista de adjacência usando a biblioteca 'igraph' em R.
+
+```{r}
 library(igraph)
 
 grafo <- graph.data.frame(myadj)
 
 plot(grafo)
 
+```
+
+Renomear o grafo para aproveitar os códigos já escritos:
+
+```{r}
 graphdj <- grafo
 
+```
 
+Definição dos parâmetros de input para a função.
 
-# Criação de uma matriz de adjacência com dados:
-datadij <- as.matrix(read.table(text=
-                                  "node X1 X2 X3 X4 X5 X6
-                            1  0  3  7  4 NA NA
-                            2  3  0  2 NA NA  9
-                            3  7  2  0  1  3  6
-                            4  4 NA  1  0  3 NA
-                            5 NA NA  3  3  0  3
-                            6 NA  9  6 NA  3  0", header=T))
+Número de nodes:
 
-# Preparação dos dados para criar uma função para grafo: definir NA como zero para indicar que não há limite direto.
-newdatadij <- datadij[,1]
-datadij <- datadij[, -1]
-colnames(datadij) <- rownames(datadij) <- newdatadij
-datadij[is.na(datadij)] <- 0
-
-
-# criação do grafo com base na matriz de adjacência usando a biblioteca 'igraph' em R.
-library(igraph)
-
-graphdj <- graph.adjacency(datadij, weighted=TRUE)
-
-plot(graphdj)
-
-# Definição dos parâmetros de input para a função:
-
-# Número de nodes:
+```{r}
 n = length(graphdj[,1])
+```
 
-# Fonte do node:
+Fonte do node:
+
+```{r}
 v = 1
+```
 
-# Destino do node:
+Destino do node:
+
+```{r}
 dest = n
+```
 
-# Grafo:
+Grafo:
+
+```{r}
 cost = graphdj
+```
 
+### Algoritmo Dijkstra
 
-## Algoritmo Dijkstra
+```{r}
+
 dijkstra = function(n,v,cost,dest){
   # criação de variáveis para guardar os dados
   dest = numeric(n)
@@ -108,9 +119,11 @@ dijkstra = function(n,v,cost,dest){
   return(prev)
 }
 
+```
 
-## Criação de uma função que retorne o caminho.
+Criação de uma função que retorne o caminho.
 
+```{r}
 save_path = function(f,x){
   path = x
   while(f[x] != -1){
@@ -121,16 +134,32 @@ save_path = function(f,x){
   path = c(path, 1)
   return(path)
 }
+```
 
-## Rodar o algoritmo Dijkstra no grafo criado.
+Rodar o algoritmo Dijkstra no grafo criado.
 
+```{r}
 prev = dijkstra(n,v,cost,dest)
 path = save_path(prev,dest)
+```
 
-## Para mostrar path
+Resultados:
+
+```{r}
+prev
+
 path
+```
 
-### Comparação com a função já construída da biblioteca 'igraph'
+### Comparação com a função já construída da biblioteca 'igraph' (R Programming)
 
+```{r}
 dij.paths <- shortest.paths(graphdj, algorithm = "dijkstra")
+```
+
+```{r}
+par(mfrow=c(1,2))
+plot(path, main="My Dijkstra Function")
+plot(dij.paths, main="Built-in function on 'igraph' library")
+```
 
