@@ -1,6 +1,19 @@
 ### Implementação do Algoritmo Dijkstra, que mede o caminho mais curto.
 # Essa implementação segue as especificações dadas no livro "Algorithm Design" de Jon Kleinberg e Eva Tardos.
 
+
+ist.1.1 <- read.delim("inst_v100_s1.dat")
+ist.2.1 <- read.delim("inst_v200_s1.dat")
+ist.3.1 <- read.delim("inst_v300_s1.dat")
+ist.4.1 <- read.delim("inst_v400_s1.dat")
+ist.5.1 <- read.delim("inst_v500_s1.dat")
+ist.6.1 <- read.delim("inst_v600_s1.dat")
+ist.7.1 <- read.delim("inst_v700_s1.dat")
+ist.8.1 <- read.delim("inst_v800_s1.dat")
+ist.9.1 <- read.delim("inst_v900_s1.dat")
+ist.10.1 <- read.delim("inst_v1000_s1.dat")
+
+
 # Criação de uma lista de adjacência com dados:
 
 edgesdf <- data.frame(nodea=c(1,2,4,2,1), nodeb=c(1,2,3,4,5))
