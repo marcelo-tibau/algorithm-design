@@ -176,6 +176,7 @@ prev2 <- dijkstra(n,v,cost,dest)
 path2 <- save_path(prev2, dest) 
 
 prev10 <- dijkstra(n,v,cost,dest)
+path10 <- save_path(prev10, dest)
 
 prev = dijkstra(n,v,cost,dest)
 path = save_path(prev,dest)
