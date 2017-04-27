@@ -111,6 +111,7 @@ dest = n
 # Custo:
 cost = tree.2.1
 
+is.vector(list(tree.2.1))
 
 ## Algoritmo Dijkstra
 dijkstra = function(n,v,cost,dest){
