@@ -17,6 +17,7 @@ ist.10.1 <- read.delim("inst_v1000_s1.dat")
 
 library('igraph')
 
+
 grafo.1.1 <- graph.data.frame(ist.1.1)
 list.1.1 <- get.adjedgelist(grafo.1.1)
 
@@ -61,6 +62,10 @@ saveRDS(list.9.1, file = 'list.9.1.rds')
 saveRDS(list.10.1, file = 'list.10.1.rds')
 
 
+library('data.tree')
+
+
+
 # Test Set 2
 
 ist.1.2 <- read.delim("inst_v100_s2.dat")
@@ -77,13 +82,25 @@ ist.10.2 <- read.delim("inst_v1000_s2.dat")
 
 
 
-# Definição dos parâmetros de input para a função:
+# Definição dos parâmetros de input para a função e transformação em heap binário
 
 dfinst.10.1 <- readRDS(file = './listas_frequencia/list.10.1.rds')
+
+n = length(dfinst.10.1) 
+tree.10.1 <- make_tree(n, children = 2)
+
+co <- layout.reingold.tilford(tree.10.1, params=list(root=1)) 
+plot(tree.10.1, layout=co)
+
 graphdj.10.1 <- graph.adjacency(dfinst.10.1, weighted=TRUE)
 
+dfinst.2.1 <- readRDS(file = './listas_frequencia/list.2.1.rds')
+
+n2 = length(dfinst.2.1)
+tree.2.1 <- make_tree(n2, children = 2)
+
 # Número de nodes:
-n = length(grafo.10.1[,1])
+n = length(tree.2.1[,1])
 
 # Fonte do node:
 v = 1
@@ -92,7 +109,7 @@ v = 1
 dest = n
 
 # Custo:
-cost = grafo.10.1
+cost = tree.2.1
 
 
 ## Algoritmo Dijkstra
@@ -108,7 +125,7 @@ dijkstra = function(n,v,cost,dest){
     dest[i] = cost[v,i]
   }
   # para iniciar o contador que vai marcar o número de passos na rede
-  count = 10
+  count = 2
   
   # até chegar ao node de destino n
   while(count <= n){
@@ -153,6 +170,9 @@ save_path = function(f,x){
 }
 
 ## Rodar o algoritmo Dijkstra no grafo criado.
+
+prev2 <- dijkstra(n,v,cost,dest)
+path2 <- save_path(prev2, dest) 
 
 prev10 <- dijkstra(n,v,cost,dest)
 
