@@ -52,65 +52,60 @@ struct Graph* createGraph(int V)
     return graph;
 }  
  
-
- 
- 
- 
-// Adds an edge to an undirected graph
+// Inclusão de vertice no grafo levando a inclusão de nó na lista de adjacência
 void addEdge(struct Graph* graph, int src, int dest, int weight)
 {
-    // Add an edge from src to dest.  A new node is added to the adjacency
-    // list of src.  The node is added at the begining
     struct AdjListNode* newNode = newAdjListNode(dest, weight);
     newNode->next = graph->array[src].head;
     graph->array[src].head = newNode;
- 
-    // Since graph is undirected, add an edge from dest to src also
+    
+    // Inclusão de vertice da fonte para o destino
     newNode = newAdjListNode(src, weight);
     newNode->next = graph->array[dest].head;
     graph->array[dest].head = newNode;
 }
+
+ // Estrutura para representar o nó do heap binário
+ struct MinHeapNode
+ {
+     int v;
+     int dist;
+ };
  
-// Structure to represent a min heap node
-struct MinHeapNode
-{
-    int  v;
-    int dist;
-};
  
-// Structure to represent a min heap
+// Estrutura para representar o heap binário 
 struct MinHeap
 {
-    int size;      // Number of heap nodes present currently
-    int capacity;  // Capacity of min heap
-    int *pos;     // This is needed for decreaseKey()
+    int size;
+    int capacity;
+    int*pos;
     struct MinHeapNode **array;
 };
- 
-// A utility function to create a new Min Heap Node
+
+// Função para criar o nó do heap binário
 struct MinHeapNode* newMinHeapNode(int v, int dist)
 {
     struct MinHeapNode* minHeapNode =
-           (struct MinHeapNode*) malloc(sizeof(struct MinHeapNode));
+    (struct MinHeapNode*) malloc(sizeof(struct MinHeapNode));
     minHeapNode->v = v;
     minHeapNode->dist = dist;
     return minHeapNode;
 }
- 
-// A utility function to create a Min Heap
+
+// Função para criar o heap binário
 struct MinHeap* createMinHeap(int capacity)
 {
     struct MinHeap* minHeap =
-         (struct MinHeap*) malloc(sizeof(struct MinHeap));
+    (struct MinHeap*) malloc(sizeof(struct MinHeap));
     minHeap->pos = (int *)malloc(capacity * sizeof(int));
     minHeap->size = 0;
     minHeap->capacity = capacity;
-    minHeap->array =
-         (struct MinHeapNode**) malloc(capacity * sizeof(struct MinHeapNode*));
+    minHeap->array = (struct MinHeapNode**) malloc(capacity * sizeof(struct MinHeapNode*));
     return minHeap;
+    
 }
  
-// A utility function to swap two nodes of min heap. Needed for min heapify
+// Função para fazer o min heapify
 void swapMinHeapNode(struct MinHeapNode** a, struct MinHeapNode** b)
 {
     struct MinHeapNode* t = *a;
@@ -118,168 +113,150 @@ void swapMinHeapNode(struct MinHeapNode** a, struct MinHeapNode** b)
     *b = t;
 }
  
-// A standard function to heapify at given idx
-// This function also updates position of nodes when they are swapped.
-// Position is needed for decreaseKey()
+// Função para fazer o update dos nós
+ 
 void minHeapify(struct MinHeap* minHeap, int idx)
 {
     int smallest, left, right;
     smallest = idx;
     left = 2 * idx + 1;
     right = 2 * idx + 2;
- 
+    
     if (left < minHeap->size &&
-        minHeap->array[left]->dist < minHeap->array[smallest]->dist )
-      smallest = left;
- 
+    minHeap->array[right]->dist < minHeap->array[smallest]->dist)
+        smallest = left
+        
     if (right < minHeap->size &&
-        minHeap->array[right]->dist < minHeap->array[smallest]->dist )
-      smallest = right;
- 
+    minHeap->array[right]->dist < minHeap->array[smallest]->dist)
+        smallest = right;
+        
     if (smallest != idx)
     {
-        // The nodes to be swapped in min heap
-        MinHeapNode *smallestNode = minHeap->array[smallest];
-        MinHeapNode *idxNode = minHeap->array[idx];
- 
-        // Swap positions
+        // Nós a serem trocados no min heap
+        MinHeapNode * smallestNode = minHeap->array[smallest];
+        MinHeapNode* idxNode = minHeap->array[idx];
+        
+        // Troca de posição
         minHeap->pos[smallestNode->v] = idx;
         minHeap->pos[idxNode->v] = smallest;
- 
-        // Swap nodes
+        
+        // Troca de nós
         swapMinHeapNode(&minHeap->array[smallest], &minHeap->array[idx]);
- 
+        
         minHeapify(minHeap, smallest);
+        
     }
+        
 }
  
-// A utility function to check if the given minHeap is ampty or not
+ 
+// Função para checar se o min heap está vazio
 int isEmpty(struct MinHeap* minHeap)
 {
     return minHeap->size == 0;
 }
  
-// Standard function to extract minimum node from heap
+// Função para extrair o nó mínimo do heap
 struct MinHeapNode* extractMin(struct MinHeap* minHeap)
 {
     if (isEmpty(minHeap))
         return NULL;
  
-    // Store the root node
+    // Guardar o nó raíz 
     struct MinHeapNode* root = minHeap->array[0];
  
-    // Replace root node with last node
+    // Substituir o nó raíz com o último nó 
     struct MinHeapNode* lastNode = minHeap->array[minHeap->size - 1];
     minHeap->array[0] = lastNode;
  
-    // Update position of last node
+    // Update da posição do último nó
     minHeap->pos[root->v] = minHeap->size-1;
     minHeap->pos[lastNode->v] = 0;
  
-    // Reduce heap size and heapify root
+    // Reduzir o tamanho do heap e heapify a raiz 
     --minHeap->size;
     minHeapify(minHeap, 0);
  
     return root;
 }
  
-// Function to decreasy dist value of a given vertex v. This function
-// uses pos[] of min heap to get the current index of node in min heap
-void decreaseKey(struct MinHeap* minHeap, int v, int dist)
-{
-    // Get the index of v in  heap array
-    int i = minHeap->pos[v];
  
-    // Get the node and update its dist value
-    minHeap->array[i]->dist = dist;
+ // Função para checar a distância do vértice e checar a indexação atual do nó
+ void decreaseKey(struct MinHeap* minHeap, int v, int dist)
+ {
+     int i = minHeap->pos[v];
+     minHeap->array[i]->dist = dist;
+     while (i && minHeap->array[i]->dist < minHeap->array[(i - 1) / 2]->dist)
+     {
+         // Troca do nó com os dos pais
+         minHeap->pos[minHeap->array[i]->v] = (i-1)/2;
+         minHeap->pos[minHeap->array[(i-1)/2]->v] = i;
+         swapMinHeapNode(&minHeap->array[i], &minHeap->array[(i-1) /2]);
+         i = (i - 1) /2;
+     }
+ }
  
-    // Travel up while the complete tree is not hepified.
-    // This is a O(Logn) loop
-    while (i && minHeap->array[i]->dist < minHeap->array[(i - 1) / 2]->dist)
-    {
-        // Swap this node with its parent
-        minHeap->pos[minHeap->array[i]->v] = (i-1)/2;
-        minHeap->pos[minHeap->array[(i-1)/2]->v] = i;
-        swapMinHeapNode(&minHeap->array[i],  &minHeap->array[(i - 1) / 2]);
- 
-        // move to parent index
-        i = (i - 1) / 2;
-    }
-}
- 
-// A utility function to check if a given vertex
-// 'v' is in min heap or not
+// Função para checar se o vertex 'v' está em min heap
+
 bool isInMinHeap(struct MinHeap *minHeap, int v)
 {
-   if (minHeap->pos[v] < minHeap->size)
-     return true;
-   return false;
+    if (minHeap->pos[v] < minHeap->size)
+        return true;
+        return false;
 }
  
-// A utility function used to print the solution
+// Função para imprimir a solução
 void printArr(int dist[], int n)
 {
-    printf("Vertex   Distance from Source\n");
+    printf("Distância do vértice da fonte\n");
     for (int i = 0; i < n; ++i)
         printf("%d \t\t %d\n", i, dist[i]);
 }
  
-// The main function that calulates distances of shortest paths from src to all
-// vertices. It is a O(ELogV) function
+// Função Dijkstra para calcular o caminho mínimo da fonte para todos os vértices 
 void dijkstra(struct Graph* graph, int src)
 {
-    int V = graph->V;// Get the number of vertices in graph
-    int dist[V];      // dist values used to pick minimum weight edge in cut
- 
-    // minHeap represents set E
+    int V = graph->V;
+    int dist[V];
+    
     struct MinHeap* minHeap = createMinHeap(V);
- 
-    // Initialize min heap with all vertices. dist value of all vertices 
     for (int v = 0; v < V; ++v)
     {
         dist[v] = INT_MAX;
         minHeap->array[v] = newMinHeapNode(v, dist[v]);
-        minHeap->pos[v] = v;
+        minHeap->pos[v]= v;
     }
- 
-    // Make dist value of src vertex as 0 so that it is extracted first
+    // Transformar o vértice fonte em 0 para extraí-lo primeiro
     minHeap->array[src] = newMinHeapNode(src, dist[src]);
-    minHeap->pos[src]   = src;
+    minHeap->pos[src] = src;
     dist[src] = 0;
     decreaseKey(minHeap, src, dist[src]);
- 
-    // Initially size of min heap is equal to V
+    
+    // Inicializar o tamanho do min heap como sendo 2
     minHeap->size = V;
- 
-    // In the followin loop, min heap contains all nodes
-    // whose shortest distance is not yet finalized.
-    while (!isEmpty(minHeap))
+    
+    // Incluir todos os nós que não tiveram sua menor distância finalizada
+    while (!isEmpt(minHeap))
     {
-        // Extract the vertex with minimum distance value
         struct MinHeapNode* minHeapNode = extractMin(minHeap);
-        int u = minHeapNode->v; // Store the extracted vertex number
- 
-        // Traverse through all adjacent vertices of u (the extracted
-        // vertex) and update their distance values
+        int u = minHeapNode->v;
+        
         struct AdjListNode* pCrawl = graph->array[u].head;
         while (pCrawl != NULL)
         {
             int v = pCrawl->dest;
- 
-            // If shortest distance to v is not finalized yet, and distance to v
-            // through u is less than its previously calculated distance
-            if (isInMinHeap(minHeap, v) && dist[u] != INT_MAX && 
-                                          pCrawl->weight + dist[u] < dist[v])
+            
+            if (isInMinHeap(minHeap, v) && dist[u] != INT_MAX && pCrawl->weight + dist[u] < dist[v])
+            
             {
-                dist[v] = dist[u] + pCrawl->weight;
- 
-                // update distance value in min heap also
+                dist[v] = dist[v] + pCrawl->weight;
                 decreaseKey(minHeap, v, dist[v]);
             }
             pCrawl = pCrawl->next;
         }
     }
- 
-    // print the calculated shortest distances
     printArr(dist, V);
+ 
 }
+ 
+ 
