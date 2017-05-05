@@ -4,6 +4,23 @@
 #include <stdlib.h>
 #include <limits.h>
  
+int main()
+{
+   FILE *inst_1_1;
+   char str[60];
+   
+   // Abrindo as instâncias//
+   inst_1_1 = fopen("inst_v100_s1.dat" , "r");
+      if( fgets (str, 60, inst_1_1)!=NULL ) 
+   {
+      //acessando o conteúdo stdout//
+      puts(str);
+   }
+   fclose(inst_1_1);
+   
+   return(0);
+}
+ 
 // Estrutura para representar o nó na lista de adjacência
 struct AdjListNode
 {
@@ -124,7 +141,7 @@ void minHeapify(struct MinHeap* minHeap, int idx)
     
     if (left < minHeap->size &&
     minHeap->array[right]->dist < minHeap->array[smallest]->dist)
-        smallest = left
+        smallest = left;
         
     if (right < minHeap->size &&
     minHeap->array[right]->dist < minHeap->array[smallest]->dist)
@@ -236,7 +253,8 @@ void dijkstra(struct Graph* graph, int src)
     minHeap->size = V;
     
     // Incluir todos os nós que não tiveram sua menor distância finalizada
-    while (!isEmpt(minHeap))
+    
+    while (!isEmpty(minHeap))
     {
         struct MinHeapNode* minHeapNode = extractMin(minHeap);
         int u = minHeapNode->v;
@@ -246,7 +264,8 @@ void dijkstra(struct Graph* graph, int src)
         {
             int v = pCrawl->dest;
             
-            if (isInMinHeap(minHeap, v) && dist[u] != INT_MAX && pCrawl->weight + dist[u] < dist[v])
+            if (isInMinHeap(minHeap, v) && dist[u] != INT_MAX && 
+                                           pCrawl->weight + dist[u] < dist[v])
             
             {
                 dist[v] = dist[v] + pCrawl->weight;
