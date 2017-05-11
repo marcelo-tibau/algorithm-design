@@ -7,17 +7,32 @@
 
 int main()
 {
+    printf("Test\n");
+    
+    //getc();
+    
    FILE *inst_1_1;
-   char str[60];
+   char str[30];
+   unsigned int i = 0;
    
    // Open the files//
-   inst_1_1 = fopen("inst_v100_s1.dat" , "r");
-      if( fgets (str, 60, inst_1_1)!=NULL ) 
+   inst_1_1 = fopen("C:\\Users\\Marcelo\\iCloudDrive\\Work\\Casa - Pessoal\\0_Project CP\\Study\\MESTRADO\\UNIRIO\\2017\\MESTRADO\\Disciplinas\\Analise_e_Projeto_Algoritmos\\C\\instancias\\DijkstraImplementation\\Dijkstra_implem\\Test_Dijkstra_2\\check_v5_s1.dat" , "r");
+      if( inst_1_1 != NULL ) 
    {
       //accessing content stdout//
-      puts(str);
+      fscanf(inst_1_1, "%29s", str);
+      while(!feof(inst_1_1))
+        {  
+            i = i + 1;
+            printf("%-5d%-100s\n", i, str);   
+            fscanf(inst_1_1, "%29s", str);
+        }
+        
+        fclose(inst_1_1);
    }
    fclose(inst_1_1);
+   
+   puts("test");
    
    return(0);
 }
