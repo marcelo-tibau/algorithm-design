@@ -299,7 +299,7 @@ int main(int argc, char** argv) {
                         fscanf(inst_1_1, "%29s", str);
                     }
                     
-                    fclose(inst_1_1);
+                    
                                 
     return 0;            
 }
