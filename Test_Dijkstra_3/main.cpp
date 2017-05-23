@@ -1,3 +1,11 @@
+//#include <stdio.h>
+
+//int main(int argc, char **argv)
+//{
+	//printf("hello world\n");
+	//return 0;
+//}
+
 // C program for Dijkstra's shortest path algorithm for adjacency
 // list representation of graph
  
@@ -283,23 +291,31 @@ for (int v = 0; v < V; ++v)
             
             printArr(dist, V);
 }
-int main(int argc, char** argv) {
-    //Open the file
-                FILE *inst_1_1;
-                char str[30];
-                unsigned int i = 0;
-                
-                inst_1_1 = fopen("inst_v100_s1.dat" , "r");
-                if( inst_1_1 != NULL )
-                    fscanf(inst_1_1, "%29s", str);
-                    while(!feof(inst_1_1))
-                    {
-                        i = i + 1;
-                        printf("%-5d%-100s\n", i, str);
-                        fscanf(inst_1_1, "%29s", str);
-                    }
-                    
-                    
-                                
-    return 0;            
+
+int main(int argc, char** argv)
+{
+        
+   FILE *inst_1_1;
+   char str[30];
+   unsigned int i = 0;
+   
+   // Open the files//
+   inst_1_1 = fopen("C:\\Users\\Marcelo\\iCloudDrive\\Work\\Casa - Pessoal\\0_Project CP\\Study\\MESTRADO\\UNIRIO\\2017\\MESTRADO\\Disciplinas\\Analise_e_Projeto_Algoritmos\\C\\instancias\\DijkstraImplementation\\Dijkstra_implem\\Test_Dijkstra_3\\Test_Dijkstra_3\\inst_v100_s1.dat" , "r");
+      if( inst_1_1 != NULL ) 
+   {
+      //accessing content stdout//
+      fscanf(inst_1_1, "%29s", str);
+      while(!feof(inst_1_1))
+        {  
+            i = i + 1;
+            printf("%-5d%-100s\n", i, str);   
+            fscanf(inst_1_1, "%29s", str);
+        }
+        
+        fclose(inst_1_1);
+   }
+   fclose(inst_1_1);
+   
+      
+   return(0);
 }
