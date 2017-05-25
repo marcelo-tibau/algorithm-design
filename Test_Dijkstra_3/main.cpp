@@ -1,11 +1,3 @@
-//#include <stdio.h>
-
-//int main(int argc, char **argv)
-//{
-	//printf("hello world\n");
-	//return 0;
-//}
-
 // C program for Dijkstra's shortest path algorithm for adjacency
 // list representation of graph
  
@@ -310,6 +302,22 @@ int main(int argc, char** argv)
             i = i + 1;
             printf("%-5d%-100s\n", i, str);   
             fscanf(inst_1_1, "%29s", str);
+            struct AdjListNode;
+            struct AdjList;
+            struct Graph;
+            //struct AdjListNode* newAdjListNode(int dest, int weight);
+            //malloc(sizeof(struct AdjListNode));
+            //struct Graph* createGraph(int V);
+            //void addEdge(struct Graph* graph, int src, int dest, int weight);
+            struct MinHeapNode;
+            struct MinHeap;
+            //struct MinHeapNode* newMinHeapNode(int v, int dist);
+            //struct MinHeap* createMinHeap(int capacity);
+            //swapMinHeapNode(struct MinHeapNode** a, struct MinHeapNode** b);
+            //minHeapify(struct MinHeap* minHeap, int idx);
+            //struct MinHeapNode* extractMin(struct MinHeap* minHeap);
+            //decreaseKey(struct MinHeap* minHeap, int v, int dist);
+            //printArr(int dist[], int n);
         }
         
         fclose(inst_1_1);
