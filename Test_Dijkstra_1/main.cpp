@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <string.h>
+#include <time.h>
 
 // Struct para representar um nó na lista de adjacência
 struct VerticeListaAdj
@@ -307,19 +308,20 @@ void dijkstra(struct Grafo* grafo, int origem)
     // imprime as menores distâncias calculadas
     //imprime(dist, V);
     FILE *arquivoSaida;
-    arquivoSaida = abreArquivo('a',"C:\\Users\\Marcelo\\iCloudDrive\\Work\\Casa - Pessoal\\0_Project CP\\Study\\MESTRADO\\UNIRIO\\2017\\MESTRADO\\Disciplinas\\Analise_e_Projeto_Algoritmos\\C\\instancias\\DijkstraImplementation\\Dijkstra_implem\\Test_Dijkstra_1\\Saida_test1\\Saida_inst_v100_s1.txt");
+    arquivoSaida = abreArquivo('a',"C:\\Users\\Marcelo\\iCloudDrive\\Work\\Casa - Pessoal\\0_Project CP\\Study\\MESTRADO\\UNIRIO\\2017\\MESTRADO\\Disciplinas\\Analise_e_Projeto_Algoritmos\\C\\instancias\\DijkstraImplementation\\Dijkstra_implem\\Test_Dijkstra_1\\Saida_dmxa\\Saida_dmxa0296.txt");
 
     for (int i = 0; i < V; ++i)
         fprintf(arquivoSaida, "%d \t %d\n", i, dist[i]);
-
-    fechaArquivo(arquivoSaida);
+        
+    fechaArquivo(arquivoSaida);  
 }
 
 
 // Programa main para testar as funções acima
 int main()
 {
-    
+    clock_t begin = clock();
+     
     // testes com arquivos
 
 
@@ -330,13 +332,12 @@ int main()
 	int V;
     struct Grafo* grafo = constroiGrafo(0);
 
-	arquivoEntrada = abreArquivo('l',"C:\\Users\\Marcelo\\iCloudDrive\\Work\\Casa - Pessoal\\0_Project CP\\Study\\MESTRADO\\UNIRIO\\2017\\MESTRADO\\Disciplinas\\Analise_e_Projeto_Algoritmos\\C\\instancias\\DijkstraImplementation\\Dijkstra_implem\\Test_Dijkstra_1\\inst_v100_s1.dat");
-	//arquivoSaida = abreArquivo('a',"saida.txt");
-
-
+	arquivoEntrada = abreArquivo('l',"C:\\Users\\Marcelo\\iCloudDrive\\Work\\Casa - Pessoal\\0_Project CP\\Study\\MESTRADO\\UNIRIO\\2017\\MESTRADO\\Disciplinas\\Analise_e_Projeto_Algoritmos\\C\\instancias\\DijkstraImplementation\\Dijkstra_implem\\Test_Dijkstra_1\\dmxa0296.stp");
+	//arquivoSaida = abreArquivo('a',"C:\\Users\\Marcelo\\iCloudDrive\\Work\\Casa - Pessoal\\0_Project CP\\Study\\MESTRADO\\UNIRIO\\2017\\MESTRADO\\Disciplinas\\Analise_e_Projeto_Algoritmos\\C\\instancias\\DijkstraImplementation\\Dijkstra_implem\\Test_Dijkstra_1\\Saida_dmxa\\Saida_dmxa0296.txt");
+     
 	while(!feof(arquivoEntrada))
 	{
-
+                
         fscanf(arquivoEntrada, "%s %d %d %d" , &prefixo, &valor1, &valor2, &valor3);
         if(strcmp(prefixo, "V") == 0)
         {
@@ -347,17 +348,16 @@ int main()
         }
         if(strcmp(prefixo, "E") == 0){
             insereAresta(grafo, valor1, valor2, valor3);
-            //fprintf(arquivoSaida, "%s %d %d %d\n", inicio, valor1, valor2, valor3);
+            //fprintf(arquivoSaida, "%s %d %d %d\n", &prefixo, &valor1, &valor2, &valor3);
             //fprintf(arquivoSaida,"%d %d %d\n", valor1, valor2, valor3);
         }
+      
 	}
-
-
-
 	fechaArquivo(arquivoEntrada);
-	//fechaArquivo(arquivoSaida);
-
+    
     dijkstra(grafo, 0);
-
+    clock_t end = clock();
+    printf("Tempo decorrido: %f milissegundo(s)\n", (double)(end - begin)*1000 / CLOCKS_PER_SEC);     
+    
     return 0;
 }
