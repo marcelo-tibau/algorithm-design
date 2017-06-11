@@ -1,315 +1,437 @@
-// C program for Dijkstra's shortest path algorithm for adjacency
-// list representation of graph
- 
+#define MAXN 100000000 
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
+#include <string.h>
+#include <iostream>
+#include <Lista.h>
+#include <time.h>
 
-int main()
+using std::cout;
+using std::endl;
+using std::ostream;
+using cap3_autoreferencia::Lista; 
+
+
+class FPNaoOrdenado	{
+	
+	class Elemento{ //elemento da fila
+		int vertice; 
+		int peso;
+		
+		public:
+		Elemento(){
+			
+		}
+  		Elemento  ( int v , int p )  {
+			this->vertice  =  v ;
+			this->peso = p ;  
+		}
+		int _peso  ( )  {
+			return  this->peso ;  
+		}
+		int _vertice  ( )  {
+	 		return  this->vertice ;  
+		}
+		void atribuiPeso(int peso){
+			this->peso = peso;
+		}
+	};
+	public:
+	int tamanho; //tamanho da fila
+	Elemento vet[MAXN]; //vetor  de tamanho mamximo definido; contendo um Elemeno(vertice,peso)
+		
+	FPNaoOrdenado (){//construtor apenas inicializa o tamanho para zero
+		this->tamanho = 0;
+	}
+	
+	void insere(int dado, int prior){ 
+		if (this->tamanho == MAXN)
+			throw logic_error ("Erro: Fila cheia");
+		else{
+			Elemento e =  Elemento (dado,prior);
+			this->vet[tamanho] = e;	
+			this->tamanho++;
+		}
+	}
+	
+	Elemento remove(){  //remove o elemento de maior prioridade = menor peso
+		int menorP, posMenorP; 
+	  	if (this->tamanho < 1) 
+			throw logic_error ("Erro: fila vazia");
+  		Elemento minElem, temp; //
+		temp = (Elemento)this->vet[0]; //seta o primeiro elemento como o menor peso
+		menorP = temp._peso(); 
+		posMenorP = 0;
+
+		minElem = temp; 
+		for(int i= 1; i< this->tamanho; i++){ 
+	    	temp = this->vet[i]; //
+    		int pesoAtual =temp._peso();    	
+	    	if(menorP > pesoAtual){ //se o peso do 0, for maior que o peso da posicao 1, seta o menor para o da posicao 1;
+	      		menorP = pesoAtual; 
+	      		minElem = temp; 
+	      		posMenorP = i;
+	    	}
+	    	//printf(" menorP= %d \n",  menorP);
+	  	} 
+	  	for (int i=posMenorP; i<this->tamanho-1; i++ ){//retira o minElem, movendo os proximos pra posicao dele
+	  		this->vet[i]= this->vet[i+1]; // 
+			/*
+	  		Elemento aux = (Elemento)this->vet[i]; //
+			printf(" vet[%d]= %d \n", i, this->vet[i]);
+	  		printf(" peso[%d]= %d \n", i, aux._peso());
+	  		printf(" vertice[%d]= %d \n", i, aux._vertice());
+	  		*/
+		}
+		this->tamanho--;
+		return minElem; 
+	}
+	
+	void diminuiChave(int dado, int prior){
+		Elemento temp;
+		if (this->tamanho < 1) 
+			throw logic_error ("Erro: fila vazia");
+		temp = this->vet[0];
+		printf(" prior= %d \n",  prior);
+		if (prior < 0)
+	    	throw logic_error ("Erro: chaveNova com valor incorreto");
+		for(int i= 0; i< this->tamanho; i++){ 
+	    	temp = this->vet[i]; // 
+	    	if(dado == temp._vertice()){
+				if(prior < this->vet[i]._peso())
+	      			this->vet[i].atribuiPeso(prior); 
+	    	}     
+	  	} 		 
+	}
+
+	bool vazio () { 
+		return this->tamanho == 0; 
+	}
+
+};
+
+class Grafo  {
+	public:
+	class Aresta  {
+		int v1 ,  v2 ,  peso;
+	  	public: 
+		Aresta  ( int v1 , int v2 , int peso )  {
+			this->v1  =  v1 ;
+			this->v2  =  v2 ;
+			this->peso = peso ;  
+		}
+		
+		int _peso  ( )  {
+			return  this->peso ;  
+		}
+		int _v1  ( )  {
+	 		return  this->v1 ;  
+		}
+		int _v2  ( )  {
+	 		return  this->v2 ;  
+		}	
+	};
+	
+	class Celula {
+	    friend class Grafo;
+	    friend ostream& operator<< (ostream& out, const Celula& celula) {
+	      out << "vertice:" << celula.vertice << endl;
+	      out << "peso:"    << celula.peso    << endl;
+	      return out;
+	    }    
+		int vertice, peso;
+		Celula *prox;
+		Celula (int v, int p) {
+		    	this->vertice = v; 
+				this->peso = p;
+		}
+		public: 
+		Celula (const Celula& cel) { *this = cel; }      
+	      bool operator== (const Celula& celula) const {
+	        return this->vertice == celula.vertice;
+	      }
+	      bool operator!= (const Celula& celula) const {
+	        return this->vertice != celula.vertice;
+	      }
+	      const Celula& operator= (const Celula& cel) {     
+	        this->vertice = cel.vertice; this->peso = cel.peso;
+	        return *this; // @{\it permite atribui\c{c}\~oes encadeadas}@
+	      }      
+	      ~Celula () {}	    
+	}; 	
+	
+	Lista<Celula> *adj; 
+    int numVertices;
+    public:
+    Grafo (int numVertices) {
+  		this->adj = new Lista<Celula>[numVertices]; 
+  		this->numVertices = numVertices; 	  	
+	}	  
+	void insereAresta (int v1, int v2, int peso) {
+    	Celula item(v2, peso); 
+    	this->adj[v1].insere(item); 
+  	}
+	bool existeAresta (int v1, int v2) const {
+	    Celula item(v2, 0);
+	    return (this->adj[v1].pesquisa(item) != NULL);
+	}
+	bool listaAdjVazia (int v) {
+		return this->adj[v].vazia();  
+	}	  
+	Aresta *primeiroListaAdj (int v) {
+	    // @{\it Retorna a primeira aresta que o v\'ertice v participa ou}@
+	    // @{\it {\bf NULL} se a lista de adjac\^encia de v for vazia}@ 
+	    // Retorna a primeira aresta que o vértice v participa ou
+		// null se a lista de adjacência de v for vazia
+	    Celula *item = this->adj[v]._primeiro();
+	    return item != NULL ? new Aresta(v,item->vertice,item->peso) : NULL;
+	  }
+	Aresta *proxAdj (int v) {
+	    // @{\it Retorna a pr\'oxima aresta que o v\'ertice v participa ou}@
+	    // @{\it {\bf NULL} se a lista de adjac\^encia de v estiver no fim}@
+	    Celula *item = this->adj[v].proximo();    
+	    return item != NULL ? new Aresta(v,item->vertice,item->peso) : NULL;
+	}
+	Aresta *retiraAresta (int v1, int v2) {
+	    Celula chave(v2, 0);
+	    Celula *item = this->adj[v1].retira(chave);
+	    Aresta *aresta = item != NULL ? new Aresta(v1,v2,item->peso) : NULL;
+	    delete item; 
+		return aresta;
+	}	
+  	void imprime(){
+	    for (int i = 0; i < this->numVertices; i++) { 
+		    cout << "Vertice " << i << ":" << endl;
+		    Celula *item = this->adj[i]._primeiro ();
+		    while (item != NULL) {
+		      	cout << "  " << item->vertice << " (" <<item->peso<< ")" << endl;
+		    	item = this->adj[i].proximo ();
+		    }
+	    }
+  	}	
+	int _numVertices () { 
+		return this->numVertices; 
+	}  	
+	
+  ~Grafo () {
+    delete []this->adj;
+  }	  	
+	
+};
+
+class Dijkstra {
+	private:
+	  int *antecessor; //vetor de antecessores dos vertices
+	  int *p;//vetor de pesos do vertice
+	  
+	public:
+	Grafo *grafo;
+	Dijkstra (Grafo *grafo) { 
+  		this->grafo = grafo; 
+		this->antecessor = NULL; 
+		this->p = NULL;
+  	}  
+	
+	
+	void calculaDijkstra (int raiz) throw (logic_error) {
+		//printf("chegou aqui - 0 \n");
+		int n = this->grafo->_numVertices();
+		//printf("chegou aqui - 1 \n");
+		
+	    if (this->p) 
+			delete [] this->p;
+	    // vetor de peso dos vértices - no final do algoritmo ele estará marcado na 
+	    //posicao [0..n] o menor caminho do vertice inicial até cada vertice u em [0..n]		
+	    this->p = new int[n]; // 
+	    int *vs = new int[n]; // @{\it v\'ertices}@
+		
+	    if (this->antecessor) 
+			delete [] this->antecessor;
+	    this->antecessor = new int[n];
+
+	    for (int u = 0; u < n; u ++) {
+	      this->antecessor[u] = -1;
+	      p[u] = INT_MAX; // @$\infty$@
+	      vs[u] = u; // @{\it Heap indireto a ser constru\'{\i}do}@
+	    }
+
+	    p[raiz] = 0;
+	    FPNaoOrdenado *fila = new FPNaoOrdenado();
+
+		int valorVertice;
+	    int valorPeso;
+	    for (int i = 0; i<n; i++){
+	    	valorVertice = (int) vs[i];
+	    	valorPeso = (int)p[i];
+	    	printf("i= %d \n", i);
+	    	fila->insere(valorVertice,valorPeso);
+		}    
+	    while (!fila->vazio()){
+
+	      	int u = fila->remove()._vertice(); //u é o numero do vertice extraido
+
+	      	if (!this->grafo->listaAdjVazia (u)) {
+	        	Grafo::Aresta *adj = grafo->primeiroListaAdj (u);
+				while (adj != NULL) {
+	          		int v = adj->_v2 ();
+	          		//o vertice v, nao está mais na mesma posicao da fila, assim, o p[v] está incorreto
+	          		//tenho q buscar a posicao de v na heap
+	          		if (this->p[v] > (this->p[u] + adj->_peso ())) {
+	            		antecessor[v] = u; 
+	            		fila->diminuiChave(v, this->p[u] + adj->_peso ());
+	            		this->p[v] = this->p[u] + adj->_peso ();
+	          		}else{
+	          			
+					}
+	          		delete adj; 
+			  		adj = grafo->proxAdj (u);
+	        	}
+	      	}
+	    }
+	    delete [] vs;		
+	}
+	
+  	int _antecessor (int u) { 
+  		return this->antecessor[u]; 
+	}
+  	int _peso (int u){ 
+	  	return this->p[u]; 
+	}
+  	void imprime () {
+    	for (int u = 0; u < this->grafo->_numVertices (); u++)
+      		if (this->antecessor[u] != -1) 
+        		cout << "(" << antecessor[u] <<  "," << u << ") -- p:" << _peso (u) << endl;
+  	}
+ 	void imprimeCaminho (int origem, int v) const {
+    	if (origem == v) 
+			cout << origem << endl;
+    	else if (this->antecessor[v] == -1) 
+      	cout << "Nao existe caminho de " << origem << " ate " << v << endl;
+    	else {
+      		imprimeCaminho (origem, this->antecessor[v]);
+      		cout << v << endl;
+    	}    
+  	}	
+  	~Dijkstra () { 
+  		this->grafo = NULL;    	
+    	if (this->p) 
+			delete [] this->p;
+  		if (this->antecessor) 
+		  	delete [] this->antecessor; 
+  }  
+  
+
+void fechaArquivo(FILE* arquivo)
 {
-    printf("Test\n");
+    fclose(arquivo);
+}
+};
+
+
+
+void fechaArquivo(FILE* arquivo)
+{
+    fclose(arquivo);
+}
+
+
+
+// Programa main para testar as funÃ§Ãµes acima
+int main(){
+    // testes com arquivos
+
+	FILE *arquivoEntrada;
+//	FILE *arquivoSaida;
+    char prefixo[10];
+    int valor1, valor2, valor3;
+
+	int nVertices = 0;
+	int nArestas = 0;
+	int raiz = 0;
+	
+	Grafo *grafo = new Grafo (nVertices);
     
-    //getc();
-    
-   FILE *inst_1_1;
-   char str[30];
-   unsigned int i = 0;
+	//arquivoEntrada =fopen("C:\\Users\\rubiasa\\Downloads\\inst_v5.txt", "r");
+	//arquivoEntrada =fopen("inst_v5.txt", "r");
+	//arquivoEntrada =fopen("check_v5_s1.dat", "r");
+	arquivoEntrada =fopen("C:\\Users\\Marcelo\\iCloudDrive\\Work\\Casa - Pessoal\\0_Project CP\\Study\\MESTRADO\\UNIRIO\\2017\\MESTRADO\\Disciplinas\\Analise_e_Projeto_Algoritmos\\C\\instancias\\DijkstraImplementation\\Dijkstra_implem\\Test_Dijkstra_2\\test-set1\\test-set1\\inst_v300_s1.dat", "r");
+	printf("abriu o arquivo \n\n");
+	if(arquivoEntrada == NULL)
+   		printf("Nao foi possivel abrir o arquivo!");
    
-   // Open the files//
-   inst_1_1 = fopen("C:\\Users\\Marcelo\\iCloudDrive\\Work\\Casa - Pessoal\\0_Project CP\\Study\\MESTRADO\\UNIRIO\\2017\\MESTRADO\\Disciplinas\\Analise_e_Projeto_Algoritmos\\C\\instancias\\DijkstraImplementation\\Dijkstra_implem\\Test_Dijkstra_2\\check_v5_s1.dat" , "r");
-      if( inst_1_1 != NULL ) 
-   {
-      //accessing content stdout//
-      fscanf(inst_1_1, "%29s", str);
-      while(!feof(inst_1_1))
-        {  
-            i = i + 1;
-            printf("%-5d%-100s\n", i, str);   
-            fscanf(inst_1_1, "%29s", str);
+	while(!feof(arquivoEntrada)){
+        fscanf(arquivoEntrada, "%s %d %d %d" , &prefixo, &valor1, &valor2, &valor3);
+        printf("prefixo %s \n", prefixo);
+        printf("valor1 %d \n", valor1);
+        printf("valor2 %d \n", valor2);
+        printf("valor3 %d \n", valor3);      
+        if(strcmp(prefixo, "V") == 0){
+            printf("Total de vertices do grafo: %d \n\n", valor1);
+            
+            grafo = new Grafo (valor1);
+            
         }
+        if(strcmp(prefixo, "E") == 0){
+            
+            
+            Grafo::Aresta *a = new Grafo::Aresta (valor1, valor2, valor3);
+			grafo->insereAresta (a->_v1 (), a->_v2 (), a->_peso ());
+            //fprintf(arquivoSaida, "%s %d %d %d\n", prefixo, valor1, valor2, valor3);
+            //fprintf(arquivoSaida,"%d %d %d\n", valor1, valor2, valor3);
+            delete a;
+        }
+	}
+
+
+	fechaArquivo(arquivoEntrada);
+//	fechaArquivo(arquivoSaida);
+
+	printf("terminou de ler  o arquivo \n\n");
+
+    grafo->imprime ();  
+
+    // Variáveis para medir o tempo de execução
+    float tempo;
+    clock_t t_inicio, t_fim;
+
+	t_inicio = clock(); // Guarda o horário do início da execução
+    
+    Dijkstra dj (grafo);
+    printf("chegou aqui 0 0 \n");
+    //dj.obterArvoreCMC(0);
+    
+    int nV = grafo->_numVertices();
+    printf("nV %d \n", nV);      
+	dj.calculaDijkstra(0);
+	
+	t_fim = clock(); // Guarda o horario do fim da execução
+	
+	tempo = (t_fim, t_inicio)*1000/CLOCKS_PER_SEC; // Calcula o tempo de execução
+
+	printf("chegou aqui 0 1 \n");
+	
+    // imprime as menores distancias calculadas
+    //imprime(dist, V);
+    FILE *arquivoSaida;
+    //arquivoSaida = abreArquivo('a',"saida-inst_v5.txt");
+	//arquivoSaida =fopen("sC:\Users\Marcelo\iCloudDrive\Work\Casa - Pessoal\0_Project CP\Study\MESTRADO\UNIRIO\2017\MESTRADO\Disciplinas\Analise_e_Projeto_Algoritmos\C\instancias\DijkstraImplementation\Dijkstra_implem\Test_Dijkstra_2\Saida_test1\\aida-inst_v5.txt", "a");
+	arquivoSaida =fopen("C:\\Users\\Marcelo\\iCloudDrive\\Work\\Casa - Pessoal\\0_Project CP\\Study\\MESTRADO\\UNIRIO\\2017\\MESTRADO\\Disciplinas\\Analise_e_Projeto_Algoritmos\\C\\instancias\\DijkstraImplementation\\Dijkstra_implem\\Test_Dijkstra_2\\Saida_test1\\saida_inst_v300_s1_d2.txt", "a");
+	//arquivoSaida =fopen("saida-check_v5_s1.txt", "a");
+	printf("chegou aqui 0 2 \n");
+	// Imprime o tempo de execução
+	fprintf(arquivoSaida, "\nTempo total de execução: %.2f milissegundo(s).\n\n", tempo);
+	
+	printf("chegou aqui 0 3 \n");
+	
+    for (int i = 0; i < nV; ++i){
+    	printf("chegou aqui 0 4 \n");
+    	fprintf(arquivoSaida, "%d \t %d\n", i, dj._peso(i));
+    	//fprintf(arquivoSaida, "%d \t %d\n", i, 1);
+	}
         
-        fclose(inst_1_1);
-   }
-   fclose(inst_1_1);
-   
-   puts("test");
-   
-   return(0);
-}
- 
-// A structure to represent a node in adjacency list
-struct AdjListNode
-{
-    int dest;
-    int weight;
-    struct AdjListNode* next;
-};
- 
-// A structure to represent an adjacency liat
-struct AdjList
-{
-    struct AdjListNode *head;  // pointer to head node of list
-};
- 
-// A structure to represent a graph. A graph is an array of adjacency lists.
-// Size of array will be V (number of vertices in graph)
-struct Graph
-{
-    int V;
-    struct AdjList* array;
-};
- 
-// A utility function to create a new adjacency list node
-struct AdjListNode* newAdjListNode(int dest, int weight)
-{
-    struct AdjListNode* newNode =
-            (struct AdjListNode*) malloc(sizeof(struct AdjListNode));
-    newNode->dest = dest;
-    newNode->weight = weight;
-    newNode->next = NULL;
-    return newNode;
-}
- 
-// A utility function that creates a graph of V vertices
-struct Graph* createGraph(int V)
-{
-    struct Graph* graph = (struct Graph*) malloc(sizeof(struct Graph));
-    graph->V = V;
- 
-    // Create an array of adjacency lists.  Size of array will be V
-    graph->array = (struct AdjList*) malloc(V * sizeof(struct AdjList));
- 
-     // Initialize each adjacency list as empty by making head as NULL
-    for (int i = 0; i < V; ++i)
-        graph->array[i].head = NULL;
- 
-    return graph;
-}
- 
-// Adds an edge to an undirected graph
-void addEdge(struct Graph* graph, int src, int dest, int weight)
-{
-    // Add an edge from src to dest.  A new node is added to the adjacency
-    // list of src.  The node is added at the begining
-    struct AdjListNode* newNode = newAdjListNode(dest, weight);
-    newNode->next = graph->array[src].head;
-    graph->array[src].head = newNode;
- 
-    // Since graph is undirected, add an edge from dest to src also
-    newNode = newAdjListNode(src, weight);
-    newNode->next = graph->array[dest].head;
-    graph->array[dest].head = newNode;
-}
- 
-// Structure to represent a min heap node
-struct MinHeapNode
-{
-    int  v;
-    int dist;
-};
- 
-// Structure to represent a min heap
-struct MinHeap
-{
-    int size;      // Number of heap nodes present currently
-    int capacity;  // Capacity of min heap
-    int *pos;     // This is needed for decreaseKey()
-    struct MinHeapNode **array;
-};
- 
-// A utility function to create a new Min Heap Node
-struct MinHeapNode* newMinHeapNode(int v, int dist)
-{
-    struct MinHeapNode* minHeapNode =
-           (struct MinHeapNode*) malloc(sizeof(struct MinHeapNode));
-    minHeapNode->v = v;
-    minHeapNode->dist = dist;
-    return minHeapNode;
-}
- 
-// A utility function to create a Min Heap
-struct MinHeap* createMinHeap(int capacity)
-{
-    struct MinHeap* minHeap =
-         (struct MinHeap*) malloc(sizeof(struct MinHeap));
-    minHeap->pos = (int *)malloc(capacity * sizeof(int));
-    minHeap->size = 0;
-    minHeap->capacity = capacity;
-    minHeap->array =
-         (struct MinHeapNode**) malloc(capacity * sizeof(struct MinHeapNode*));
-    return minHeap;
-}
- 
-// A utility function to swap two nodes of min heap. Needed for min heapify
-void swapMinHeapNode(struct MinHeapNode** a, struct MinHeapNode** b)
-{
-    struct MinHeapNode* t = *a;
-    *a = *b;
-    *b = t;
-}
- 
-// A standard function to heapify at given idx
-// This function also updates position of nodes when they are swapped.
-// Position is needed for decreaseKey()
-void minHeapify(struct MinHeap* minHeap, int idx)
-{
-    int smallest, left, right;
-    smallest = idx;
-    left = 2 * idx + 1;
-    right = 2 * idx + 2;
- 
-    if (left < minHeap->size &&
-        minHeap->array[left]->dist < minHeap->array[smallest]->dist )
-      smallest = left;
- 
-    if (right < minHeap->size &&
-        minHeap->array[right]->dist < minHeap->array[smallest]->dist )
-      smallest = right;
- 
-    if (smallest != idx)
-    {
-        // The nodes to be swapped in min heap
-        MinHeapNode *smallestNode = minHeap->array[smallest];
-        MinHeapNode *idxNode = minHeap->array[idx];
- 
-        // Swap positions
-        minHeap->pos[smallestNode->v] = idx;
-        minHeap->pos[idxNode->v] = smallest;
- 
-        // Swap nodes
-        swapMinHeapNode(&minHeap->array[smallest], &minHeap->array[idx]);
- 
-        minHeapify(minHeap, smallest);
-    }
-}
- 
-// A utility function to check if the given minHeap is ampty or not
-int isEmpty(struct MinHeap* minHeap)
-{
-    return minHeap->size == 0;
-}
- 
-// Standard function to extract minimum node from heap
-struct MinHeapNode* extractMin(struct MinHeap* minHeap)
-{
-    if (isEmpty(minHeap))
-        return NULL;
- 
-    // Store the root node
-    struct MinHeapNode* root = minHeap->array[0];
- 
-    // Replace root node with last node
-    struct MinHeapNode* lastNode = minHeap->array[minHeap->size - 1];
-    minHeap->array[0] = lastNode;
- 
-    // Update position of last node
-    minHeap->pos[root->v] = minHeap->size-1;
-    minHeap->pos[lastNode->v] = 0;
- 
-    // Reduce heap size and heapify root
-    --minHeap->size;
-    minHeapify(minHeap, 0);
- 
-    return root;
-}
- 
-// Function to decreasy dist value of a given vertex v. This function
-// uses pos[] of min heap to get the current index of node in min heap
-void decreaseKey(struct MinHeap* minHeap, int v, int dist)
-{
-    // Get the index of v in  heap array
-    int i = minHeap->pos[v];
- 
-    // Get the node and update its dist value
-    minHeap->array[i]->dist = dist;
- 
-    // Travel up while the complete tree is not hepified.
-    // This is a O(Logn) loop
-    while (i && minHeap->array[i]->dist < minHeap->array[(i - 1) / 2]->dist)
-    {
-        // Swap this node with its parent
-        minHeap->pos[minHeap->array[i]->v] = (i-1)/2;
-        minHeap->pos[minHeap->array[(i-1)/2]->v] = i;
-        swapMinHeapNode(&minHeap->array[i],  &minHeap->array[(i - 1) / 2]);
- 
-        // move to parent index
-        i = (i - 1) / 2;
-    }
-}
- 
-// A utility function to check if a given vertex
-// 'v' is in min heap or not
-bool isInMinHeap(struct MinHeap *minHeap, int v)
-{
-   if (minHeap->pos[v] < minHeap->size)
-     return true;
-   return false;
-}
- 
-// A utility function used to print the solution
-void printArr(int dist[], int n)
-{
-    printf("Vertex   Distance from Source\n");
-    for (int i = 0; i < n; ++i)
-        printf("%d \t\t %d\n", i, dist[i]);
-}
- 
-// The main function that calulates distances of shortest paths from src to all
-// vertices. It is a O(ELogV) function
-void dijkstra(struct Graph* graph, int src)
-{
-    int V = graph->V;// Get the number of vertices in graph
-    int dist[V];      // dist values used to pick minimum weight edge in cut
- 
-    // minHeap represents set E
-    struct MinHeap* minHeap = createMinHeap(V);
- 
-    // Initialize min heap with all vertices. dist value of all vertices 
-    for (int v = 0; v < V; ++v)
-    {
-        dist[v] = INT_MAX;
-        minHeap->array[v] = newMinHeapNode(v, dist[v]);
-        minHeap->pos[v] = v;
-    }
- 
-    // Make dist value of src vertex as 0 so that it is extracted first
-    minHeap->array[src] = newMinHeapNode(src, dist[src]);
-    minHeap->pos[src]   = src;
-    dist[src] = 0;
-    decreaseKey(minHeap, src, dist[src]);
- 
-    // Initially size of min heap is equal to V
-    minHeap->size = V;
- 
-    // In the followin loop, min heap contains all nodes
-    // whose shortest distance is not yet finalized.
-    while (!isEmpty(minHeap))
-    {
-        // Extract the vertex with minimum distance value
-        struct MinHeapNode* minHeapNode = extractMin(minHeap);
-        int u = minHeapNode->v; // Store the extracted vertex number
- 
-        // Traverse through all adjacent vertices of u (the extracted
-        // vertex) and update their distance values
-        struct AdjListNode* pCrawl = graph->array[u].head;
-        while (pCrawl != NULL)
-        {
-            int v = pCrawl->dest;
- 
-            // If shortest distance to v is not finalized yet, and distance to v
-            // through u is less than its previously calculated distance
-            if (isInMinHeap(minHeap, v) && dist[u] != INT_MAX && 
-                                          pCrawl->weight + dist[u] < dist[v])
-            {
-                dist[v] = dist[u] + pCrawl->weight;
- 
-                // update distance value in min heap also
-                decreaseKey(minHeap, v, dist[v]);
-            }
-            pCrawl = pCrawl->next;
-        }
-    }
- 
-    // print the calculated shortest distances
-    printArr(dist, V);
+    fechaArquivo(arquivoSaida);	  
+    
+    delete grafo;
+    return 0;
 }
