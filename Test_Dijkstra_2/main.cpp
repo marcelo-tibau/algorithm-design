@@ -6,12 +6,34 @@
 #include <iostream>
 #include <Lista.h>
 #include <time.h>
+#include <windows.h>
 
 using std::cout;
 using std::endl;
 using std::ostream;
 using cap3_autoreferencia::Lista; 
 
+double PCFreq = 0.0;
+__int64 CounterStart = 0;
+
+
+void StartCounter()
+{
+    LARGE_INTEGER li;
+    if(!QueryPerformanceFrequency(&li))
+    cout << "QueryPerformanceFrequency failed!\n";
+
+    PCFreq = double(li.QuadPart)/1000000.0;
+
+    QueryPerformanceCounter(&li);
+    CounterStart = li.QuadPart;
+}
+double GetCounter()
+{
+    LARGE_INTEGER li;
+    QueryPerformanceCounter(&li);
+    return double(li.QuadPart-CounterStart)/PCFreq;
+}
 
 class FPNaoOrdenado	{
 	
@@ -39,7 +61,7 @@ class FPNaoOrdenado	{
 	};
 	public:
 	int tamanho; //tamanho da fila
-	Elemento vet[MAXN]; //vetor  de tamanho mamximo definido; contendo um Elemeno(vertice,peso)
+	Elemento vet[MAXN]; //vetor  de tamanho mamximo definido; contendo um Elemento(vertice, peso)
 		
 	FPNaoOrdenado (){//construtor apenas inicializa o tamanho para zero
 		this->tamanho = 0;
@@ -55,12 +77,12 @@ class FPNaoOrdenado	{
 		}
 	}
 	
-	Elemento remove(){  //remove o elemento de maior prioridade = menor peso
+	Elemento remove(){  //remove o Elemento de maior prioridade = menor peso
 		int menorP, posMenorP; 
 	  	if (this->tamanho < 1) 
 			throw logic_error ("Erro: fila vazia");
   		Elemento minElem, temp; //
-		temp = (Elemento)this->vet[0]; //seta o primeiro elemento como o menor peso
+		temp = (Elemento)this->vet[0]; //configura o primeiro elemento como o menor peso
 		menorP = temp._peso(); 
 		posMenorP = 0;
 
@@ -68,7 +90,7 @@ class FPNaoOrdenado	{
 		for(int i= 1; i< this->tamanho; i++){ 
 	    	temp = this->vet[i]; //
     		int pesoAtual =temp._peso();    	
-	    	if(menorP > pesoAtual){ //se o peso do 0, for maior que o peso da posicao 1, seta o menor para o da posicao 1;
+	    	if(menorP > pesoAtual){ //se o peso do 0, for maior que o peso da posicao 1, configura o menor para o da posicao 1;
 	      		menorP = pesoAtual; 
 	      		minElem = temp; 
 	      		posMenorP = i;
@@ -93,17 +115,15 @@ class FPNaoOrdenado	{
 		if (this->tamanho < 1) 
 			throw logic_error ("Erro: fila vazia");
 		temp = this->vet[0];
-		printf(" prior= %d \n",  prior);
+		//printf(" prior= %d \n",  prior);
 		if (prior < 0)
 	    	throw logic_error ("Erro: chaveNova com valor incorreto");
 		for(int i= 0; i< this->tamanho; i++){ 
 	    	temp = this->vet[i]; // 
-	    	if(dado == temp._vertice()){
 				if(prior < this->vet[i]._peso())
 	      			this->vet[i].atribuiPeso(prior); 
-	    	}     
-	  	} 		 
-	}
+	    }     
+	} 		 
 
 	bool vazio () { 
 		return this->tamanho == 0; 
@@ -180,16 +200,15 @@ class Grafo  {
 		return this->adj[v].vazia();  
 	}	  
 	Aresta *primeiroListaAdj (int v) {
-	    // @{\it Retorna a primeira aresta que o v\'ertice v participa ou}@
-	    // @{\it {\bf NULL} se a lista de adjac\^encia de v for vazia}@ 
-	    // Retorna a primeira aresta que o vértice v participa ou
-		// null se a lista de adjacência de v for vazia
+	    // @{\it Retorna a primeira aresta que o vertice v participa ou}@
+	    // @{\it {\bf NULL} se a lista de adjacencia de v for vazia}@ 
+	    // Retorna a primeira aresta que o vertice v participa ou null se a lista de adjacencia de v for vazia
 	    Celula *item = this->adj[v]._primeiro();
 	    return item != NULL ? new Aresta(v,item->vertice,item->peso) : NULL;
 	  }
 	Aresta *proxAdj (int v) {
-	    // @{\it Retorna a pr\'oxima aresta que o v\'ertice v participa ou}@
-	    // @{\it {\bf NULL} se a lista de adjac\^encia de v estiver no fim}@
+	    // @{\it Retorna a proxima aresta que o vertice v participa ou}@
+	    // @{\it {\bf NULL} se a lista de adjacencia de v estiver no fim}@
 	    Celula *item = this->adj[v].proximo();    
 	    return item != NULL ? new Aresta(v,item->vertice,item->peso) : NULL;
 	}
@@ -233,18 +252,17 @@ class Dijkstra {
 		this->p = NULL;
   	}  
 	
-	
-	void calculaDijkstra (int raiz) throw (logic_error) {
+	void calculaDijkstraVetorNaoOrdenado (int raiz) throw (logic_error) {
 		//printf("chegou aqui - 0 \n");
 		int n = this->grafo->_numVertices();
 		//printf("chegou aqui - 1 \n");
 		
 	    if (this->p) 
 			delete [] this->p;
-	    // vetor de peso dos vértices - no final do algoritmo ele estará marcado na 
+	    // vetor de peso dos vertices - no final do algoritmo ele estará marcado na 
 	    //posicao [0..n] o menor caminho do vertice inicial até cada vertice u em [0..n]		
-	    this->p = new int[n]; // 
-	    int *vs = new int[n]; // @{\it v\'ertices}@
+	    this->p = new int[n];  
+	    int *vs = new int[n]; 
 		
 	    if (this->antecessor) 
 			delete [] this->antecessor;
@@ -252,8 +270,8 @@ class Dijkstra {
 
 	    for (int u = 0; u < n; u ++) {
 	      this->antecessor[u] = -1;
-	      p[u] = INT_MAX; // @$\infty$@
-	      vs[u] = u; // @{\it Heap indireto a ser constru\'{\i}do}@
+	      p[u] = INT_MAX; 
+	      vs[u] = u; // {\it Heap indireto a ser construido}
 	    }
 
 	    p[raiz] = 0;
@@ -264,7 +282,7 @@ class Dijkstra {
 	    for (int i = 0; i<n; i++){
 	    	valorVertice = (int) vs[i];
 	    	valorPeso = (int)p[i];
-	    	printf("i= %d \n", i);
+	    	//printf("i= %d \n", i);
 	    	fila->insere(valorVertice,valorPeso);
 		}    
 	    while (!fila->vazio()){
@@ -275,15 +293,14 @@ class Dijkstra {
 	        	Grafo::Aresta *adj = grafo->primeiroListaAdj (u);
 				while (adj != NULL) {
 	          		int v = adj->_v2 ();
-	          		//o vertice v, nao está mais na mesma posicao da fila, assim, o p[v] está incorreto
-	          		//tenho q buscar a posicao de v na heap
+	          		//o vertice v, nao está mais na mesma posicao da fila, assim, o p[v] está incorreto, buscar a posicao de v na heap
 	          		if (this->p[v] > (this->p[u] + adj->_peso ())) {
-	            		antecessor[v] = u; 
-	            		fila->diminuiChave(v, this->p[u] + adj->_peso ());
-	            		this->p[v] = this->p[u] + adj->_peso ();
-	          		}else{
-	          			
-					}
+	            		antecessor[v] = u;   		
+	            		if(this->p[u] != INT_MAX){
+		            		fila->diminuiChave(v, this->p[u] + adj->_peso ());
+		            		this->p[v] = this->p[u] + adj->_peso ();
+	            		}	            		
+	          		}
 	          		delete adj; 
 			  		adj = grafo->proxAdj (u);
 	        	}
@@ -337,25 +354,24 @@ void fechaArquivo(FILE* arquivo)
 
 
 
-// Programa main para testar as funÃ§Ãµes acima
+// Programa main para rodar as funcoes
+
 int main(){
-    // testes com arquivos
+   
 
 	FILE *arquivoEntrada;
 //	FILE *arquivoSaida;
     char prefixo[10];
     int valor1, valor2, valor3;
-
+	
 	int nVertices = 0;
 	int nArestas = 0;
-	int raiz = 0;
-	
-	Grafo *grafo = new Grafo (nVertices);
+	int raiz = INT_MAX;
+
+	Grafo *grafo = new Grafo (nVertices+1);
     
-	//arquivoEntrada =fopen("C:\\Users\\rubiasa\\Downloads\\inst_v5.txt", "r");
-	//arquivoEntrada =fopen("inst_v5.txt", "r");
-	//arquivoEntrada =fopen("check_v5_s1.dat", "r");
-	arquivoEntrada =fopen("C:\\Users\\Marcelo\\iCloudDrive\\Work\\Casa - Pessoal\\0_Project CP\\Study\\MESTRADO\\UNIRIO\\2017\\MESTRADO\\Disciplinas\\Analise_e_Projeto_Algoritmos\\C\\instancias\\DijkstraImplementation\\Dijkstra_implem\\Test_Dijkstra_2\\test-set1\\test-set1\\inst_v300_s1.dat", "r");
+    arquivoEntrada =fopen("C:\\Users\\Marcelo\\iCloudDrive\\Work\\Casa - Pessoal\\0_Project CP\\Study\\MESTRADO\\UNIRIO\\2017\\MESTRADO\\Disciplinas\\Analise_e_Projeto_Algoritmos\\C\\instancias\\DijkstraImplementation\\Dijkstra_implem\\Test_Dijkstra_2\\Instancias_ALUE\\Instancias_ALUE\\alue2087.stp", "r");
+	
 	printf("abriu o arquivo \n\n");
 	if(arquivoEntrada == NULL)
    		printf("Nao foi possivel abrir o arquivo!");
@@ -368,18 +384,24 @@ int main(){
         printf("valor3 %d \n", valor3);      
         if(strcmp(prefixo, "V") == 0){
             printf("Total de vertices do grafo: %d \n\n", valor1);
-            
-            grafo = new Grafo (valor1);
+            nVertices = valor1;
+            valor2 = 0;
+			valor3 = 0;
+            grafo = new Grafo (valor1+1);
             
         }
         if(strcmp(prefixo, "E") == 0){
-            
-            
+
+            if(valor1 < raiz){
+            	raiz = valor1;
+            	//std::cout << "Nova raiz :" << valor1 << endl;
+            	//system("pause");
+			}
             Grafo::Aresta *a = new Grafo::Aresta (valor1, valor2, valor3);
 			grafo->insereAresta (a->_v1 (), a->_v2 (), a->_peso ());
             //fprintf(arquivoSaida, "%s %d %d %d\n", prefixo, valor1, valor2, valor3);
             //fprintf(arquivoSaida,"%d %d %d\n", valor1, valor2, valor3);
-            delete a;
+            delete a;            
         }
 	}
 
@@ -392,39 +414,33 @@ int main(){
     grafo->imprime ();  
 
     // Variáveis para medir o tempo de execução
-    float tempo;
-    clock_t t_inicio, t_fim;
+    double tf1, tf2;
 
-	t_inicio = clock(); // Guarda o horário do início da execução
     
+	// Variáveis para medir o tempo de execução
+	std::cout << "Iniciando Dijkstra..." << endl;
+	//t_inicio = clock(); // Guarda o horário do início da execução
+	StartCounter();
+	    
     Dijkstra dj (grafo);
-    printf("chegou aqui 0 0 \n");
     //dj.obterArvoreCMC(0);
-    
-    int nV = grafo->_numVertices();
-    printf("nV %d \n", nV);      
-	dj.calculaDijkstra(0);
+    dj.calculaDijkstraVetorNaoOrdenado(raiz);
 	
-	t_fim = clock(); // Guarda o horario do fim da execução
-	
-	tempo = (t_fim, t_inicio)*1000/CLOCKS_PER_SEC; // Calcula o tempo de execução
-
-	printf("chegou aqui 0 1 \n");
+	tf1 = GetCounter();
 	
     // imprime as menores distancias calculadas
     //imprime(dist, V);
     FILE *arquivoSaida;
-    //arquivoSaida = abreArquivo('a',"saida-inst_v5.txt");
-	//arquivoSaida =fopen("sC:\Users\Marcelo\iCloudDrive\Work\Casa - Pessoal\0_Project CP\Study\MESTRADO\UNIRIO\2017\MESTRADO\Disciplinas\Analise_e_Projeto_Algoritmos\C\instancias\DijkstraImplementation\Dijkstra_implem\Test_Dijkstra_2\Saida_test1\\aida-inst_v5.txt", "a");
-	arquivoSaida =fopen("C:\\Users\\Marcelo\\iCloudDrive\\Work\\Casa - Pessoal\\0_Project CP\\Study\\MESTRADO\\UNIRIO\\2017\\MESTRADO\\Disciplinas\\Analise_e_Projeto_Algoritmos\\C\\instancias\\DijkstraImplementation\\Dijkstra_implem\\Test_Dijkstra_2\\Saida_test1\\saida_inst_v300_s1_d2.txt", "a");
-	//arquivoSaida =fopen("saida-check_v5_s1.txt", "a");
+   
+	arquivoSaida =fopen("C:\\Users\\Marcelo\\iCloudDrive\\Work\\Casa - Pessoal\\0_Project CP\\Study\\MESTRADO\\UNIRIO\\2017\\MESTRADO\\Disciplinas\\Analise_e_Projeto_Algoritmos\\C\\instancias\\DijkstraImplementation\\Dijkstra_implem\\Test_Dijkstra_2\\Saida_alue\\alue2087.txt", "a");
+	
 	printf("chegou aqui 0 2 \n");
 	// Imprime o tempo de execução
-	fprintf(arquivoSaida, "\nTempo total de execução: %.2f milissegundo(s).\n\n", tempo);
+	fprintf(arquivoSaida, "\nTempo total de execucao: %.0f microssegundos.\n\n", tf1);
 	
 	printf("chegou aqui 0 3 \n");
 	
-    for (int i = 0; i < nV; ++i){
+    for (int i = 0; i < nVertices; ++i){
     	printf("chegou aqui 0 4 \n");
     	fprintf(arquivoSaida, "%d \t %d\n", i, dj._peso(i));
     	//fprintf(arquivoSaida, "%d \t %d\n", i, 1);
