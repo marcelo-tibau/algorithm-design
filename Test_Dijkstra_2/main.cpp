@@ -370,7 +370,7 @@ int main(){
 
 	Grafo *grafo = new Grafo (nVertices+1);
     
-    arquivoEntrada =fopen("C:\\Users\\Marcelo\\iCloudDrive\\Work\\Casa - Pessoal\\0_Project CP\\Study\\MESTRADO\\UNIRIO\\2017\\MESTRADO\\Disciplinas\\Analise_e_Projeto_Algoritmos\\C\\instancias\\DijkstraImplementation\\Dijkstra_implem\\Test_Dijkstra_2\\Instancias_ALUE\\Instancias_ALUE\\alue2087.stp", "r");
+    arquivoEntrada =fopen("C:\\Users\\Marcelo\\iCloudDrive\\Work\\Casa - Pessoal\\0_Project CP\\Study\\MESTRADO\\UNIRIO\\2017\\MESTRADO\\Disciplinas\\Analise_e_Projeto_Algoritmos\\C\\instancias\\DijkstraImplementation\\Dijkstra_implem\\Test_Dijkstra_2\\test-set2\\test-set2\\inst_v1000_s2.dat", "r");
 	
 	printf("abriu o arquivo \n\n");
 	if(arquivoEntrada == NULL)
@@ -432,7 +432,7 @@ int main(){
     //imprime(dist, V);
     FILE *arquivoSaida;
    
-	arquivoSaida =fopen("C:\\Users\\Marcelo\\iCloudDrive\\Work\\Casa - Pessoal\\0_Project CP\\Study\\MESTRADO\\UNIRIO\\2017\\MESTRADO\\Disciplinas\\Analise_e_Projeto_Algoritmos\\C\\instancias\\DijkstraImplementation\\Dijkstra_implem\\Test_Dijkstra_2\\Saida_alue\\alue2087.txt", "a");
+	arquivoSaida =fopen("C:\\Users\\Marcelo\\Documents\\Work\\new2\\saida_inst_v1000_s2_d2.txt", "a");
 	
 	printf("chegou aqui 0 2 \n");
 	// Imprime o tempo de execução
