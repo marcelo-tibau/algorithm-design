@@ -254,6 +254,12 @@ void imprime(int dist[], int n)
 // os outros nós. É uma função com complexidade O(ELogV)
 void dijkstra(struct Grafo* grafo, int origem)
 {
+    // Início do tempo de medição
+    float tempo;
+    clock_t t_inicio, t_fim;
+    
+    t_inicio = clock();
+    
     int V = grafo->V;// Recebe o número de vértices do grafo
     int dist[V];      // Valores das distâncias usadas para escolher a aresta de menor peso
 
@@ -304,11 +310,20 @@ void dijkstra(struct Grafo* grafo, int origem)
             adjacente = adjacente->prox;
         }
     }
+    
+    t_fim = clock();
+    
+    tempo = (t_fim, t_inicio)*1000/CLOCKS_PER_SEC; // Calcula o tempo de execução
 
     // imprime as menores distâncias calculadas
     //imprime(dist, V);
     FILE *arquivoSaida;
-    arquivoSaida = abreArquivo('a',"C:\\Users\\Marcelo\\iCloudDrive\\Work\\Casa - Pessoal\\0_Project CP\\Study\\MESTRADO\\UNIRIO\\2017\\MESTRADO\\Disciplinas\\Analise_e_Projeto_Algoritmos\\C\\instancias\\DijkstraImplementation\\Dijkstra_implem\\Test_Dijkstra_1\\Saida_dmxa\\Saida_dmxa0296.txt");
+    arquivoSaida = abreArquivo('a',"C:\\Users\\Marcelo\\Documents\\Work\\new2\\Saida_inst_v1000_s1_d1.txt");
+    
+    // Imprime o tempo de execução
+    fprintf(arquivoSaida, "\nTempo total de execução: %f milissegundo(s).\n\n", tempo);
+    
+    // Imprime as menores distâncias calculadas
 
     for (int i = 0; i < V; ++i)
         fprintf(arquivoSaida, "%d \t %d\n", i, dist[i]);
@@ -320,8 +335,7 @@ void dijkstra(struct Grafo* grafo, int origem)
 // Programa main para testar as funções acima
 int main()
 {
-    clock_t begin = clock();
-     
+        
     // testes com arquivos
 
 
@@ -332,7 +346,7 @@ int main()
 	int V;
     struct Grafo* grafo = constroiGrafo(0);
 
-	arquivoEntrada = abreArquivo('l',"C:\\Users\\Marcelo\\iCloudDrive\\Work\\Casa - Pessoal\\0_Project CP\\Study\\MESTRADO\\UNIRIO\\2017\\MESTRADO\\Disciplinas\\Analise_e_Projeto_Algoritmos\\C\\instancias\\DijkstraImplementation\\Dijkstra_implem\\Test_Dijkstra_1\\dmxa0296.stp");
+	arquivoEntrada = abreArquivo('l',"C:\\Users\\Marcelo\\iCloudDrive\\Work\\Casa - Pessoal\\0_Project CP\\Study\\MESTRADO\\UNIRIO\\2017\\MESTRADO\\Disciplinas\\Analise_e_Projeto_Algoritmos\\C\\instancias\\DijkstraImplementation\\Dijkstra_implem\\Test_Dijkstra_1\\test-set1\\test-set1\\inst_v1000_s1.dat");
 	//arquivoSaida = abreArquivo('a',"C:\\Users\\Marcelo\\iCloudDrive\\Work\\Casa - Pessoal\\0_Project CP\\Study\\MESTRADO\\UNIRIO\\2017\\MESTRADO\\Disciplinas\\Analise_e_Projeto_Algoritmos\\C\\instancias\\DijkstraImplementation\\Dijkstra_implem\\Test_Dijkstra_1\\Saida_dmxa\\Saida_dmxa0296.txt");
      
 	while(!feof(arquivoEntrada))
@@ -356,8 +370,6 @@ int main()
 	fechaArquivo(arquivoEntrada);
     
     dijkstra(grafo, 0);
-    clock_t end = clock();
-    printf("Tempo decorrido: %f milissegundo(s)\n", (double)(end - begin)*1000 / CLOCKS_PER_SEC);     
     
     return 0;
 }
