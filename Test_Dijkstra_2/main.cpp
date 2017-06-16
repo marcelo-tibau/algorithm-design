@@ -206,12 +206,14 @@ class Grafo  {
 	    Celula *item = this->adj[v]._primeiro();
 	    return item != NULL ? new Aresta(v,item->vertice,item->peso) : NULL;
 	  }
+         
 	Aresta *proxAdj (int v) {
 	    // @{\it Retorna a proxima aresta que o vertice v participa ou}@
 	    // @{\it {\bf NULL} se a lista de adjacencia de v estiver no fim}@
 	    Celula *item = this->adj[v].proximo();    
 	    return item != NULL ? new Aresta(v,item->vertice,item->peso) : NULL;
 	}
+        
 	Aresta *retiraAresta (int v1, int v2) {
 	    Celula chave(v2, 0);
 	    Celula *item = this->adj[v1].retira(chave);
@@ -370,7 +372,7 @@ int main(){
 
 	Grafo *grafo = new Grafo (nVertices+1);
     
-    arquivoEntrada =fopen("C:\\Users\\Marcelo\\iCloudDrive\\Work\\Casa - Pessoal\\0_Project CP\\Study\\MESTRADO\\UNIRIO\\2017\\MESTRADO\\Disciplinas\\Analise_e_Projeto_Algoritmos\\C\\instancias\\DijkstraImplementation\\Dijkstra_implem\\Test_Dijkstra_2\\test-set2\\test-set2\\inst_v1000_s2.dat", "r");
+    arquivoEntrada =fopen("C:\\Users\\Marcelo\\Documents\\Work\\new2\\entrada\\Instancias_ALUE\\Instancias_ALUE\\alue2087.stp", "r");
 	
 	printf("abriu o arquivo \n\n");
 	if(arquivoEntrada == NULL)
@@ -399,6 +401,7 @@ int main(){
 			}
             Grafo::Aresta *a = new Grafo::Aresta (valor1, valor2, valor3);
 			grafo->insereAresta (a->_v1 (), a->_v2 (), a->_peso ());
+            grafo->insereAresta (a->_v2 (), a->_v1 (), a->_peso ());
             //fprintf(arquivoSaida, "%s %d %d %d\n", prefixo, valor1, valor2, valor3);
             //fprintf(arquivoSaida,"%d %d %d\n", valor1, valor2, valor3);
             delete a;            
@@ -432,11 +435,11 @@ int main(){
     //imprime(dist, V);
     FILE *arquivoSaida;
    
-	arquivoSaida =fopen("C:\\Users\\Marcelo\\Documents\\Work\\new2\\saida_inst_v1000_s2_d2.txt", "a");
+	arquivoSaida =fopen("C:\\Users\\Marcelo\\Documents\\Work\\new2\\saida\\saida_alue2087_d2.txt", "a");
 	
 	printf("chegou aqui 0 2 \n");
 	// Imprime o tempo de execução
-	fprintf(arquivoSaida, "\nTempo total de execucao: %.0f microssegundos.\n\n", tf1);
+	fprintf(arquivoSaida, "\nTempo total de execucao: %.0f milessegundos.\n\n", tf1);
 	
 	printf("chegou aqui 0 3 \n");
 	
