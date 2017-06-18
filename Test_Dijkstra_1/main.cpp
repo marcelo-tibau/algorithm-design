@@ -3,6 +3,8 @@
 #include <limits.h>
 #include <string.h>
 #include <time.h>
+#include <conio.h>
+#define INFINITO 1000000
 
 // Struct para representar um nó na lista de adjacência
 struct VerticeListaAdj
@@ -26,7 +28,7 @@ struct Grafo
     struct ListaAdj* array;
 };
 
-// Função que cria um novo nó na lista de adjacência
+// Função que cria um novo nó na lista de adjacência do grafo direcionado
 struct VerticeListaAdj* insereVerticeListaAdj(int destino, int peso)
 {
     struct VerticeListaAdj* insereVertice = (struct VerticeListaAdj*) malloc(sizeof(struct VerticeListaAdj));
@@ -34,7 +36,9 @@ struct VerticeListaAdj* insereVerticeListaAdj(int destino, int peso)
     insereVertice->peso = peso;
     insereVertice->prox = NULL;
     return insereVertice;
+   
 }
+
 
 // Função que cria um grafo com V vértices
 struct Grafo* constroiGrafo(int V)
@@ -84,7 +88,7 @@ void fechaArquivo(FILE* arquivo)
 
 
 
-// Inclui uma aresta a um grafo não direcionado
+// Inclui uma aresta em no grafo (direcionado)
 void insereAresta(struct Grafo* grafo, int origem, int destino, int peso)
 {
     // Inclui uma aresta da origem ao destino. Um novo nó é adicionado à lista de adjacência
@@ -92,8 +96,8 @@ void insereAresta(struct Grafo* grafo, int origem, int destino, int peso)
     struct VerticeListaAdj* insereVertice = insereVerticeListaAdj(destino, peso);
     insereVertice->prox = grafo->array[origem].inicio;
     grafo->array[origem].inicio = insereVertice;
-
-    // Como o grafo é não direcionado, adiciona uma aresta do destino para a origem também
+    
+     // Insere uma aresta de volta para tornar o grafo bi-direcional (ALUE e DMXA)
     insereVertice = insereVerticeListaAdj(origem, peso);
     insereVertice->prox = grafo->array[destino].inicio;
     grafo->array[destino].inicio = insereVertice;
@@ -179,7 +183,7 @@ void heapfyMin(struct HeapMin* heapMin, int ind)
     }
 }
 
-// Função para checar se a heap min está vazia ou não
+// Função para checar se a heap min está vazia
 int ehVazia(struct HeapMin* heapMin)
 {
     return heapMin->tamanho == 0;
@@ -245,7 +249,7 @@ bool existeNoHeapMin(struct HeapMin *heapMin, int v)
 // Função para imprimir a solução
 void imprime(int dist[], int n)
 {
-    printf("Menor distancia do node a partir da origem\n");
+    printf("Menor distância do nó a partir da origem\n");
     for (int i = 0; i < n; ++i)
         printf("%d \t\t %d\n", i, dist[i]);
 }
@@ -254,12 +258,13 @@ void imprime(int dist[], int n)
 // os outros nós. É uma função com complexidade O(ELogV)
 void dijkstra(struct Grafo* grafo, int origem)
 {
-    // Início do tempo de medição
+    // Variáveis para medir o tempo de execução
     float tempo;
     clock_t t_inicio, t_fim;
-    
-    t_inicio = clock();
-    
+
+    t_inicio = clock(); // Guarda o horário do início da execução
+
+
     int V = grafo->V;// Recebe o número de vértices do grafo
     int dist[V];      // Valores das distâncias usadas para escolher a aresta de menor peso
 
@@ -291,67 +296,64 @@ void dijkstra(struct Grafo* grafo, int origem)
         struct VerticeHeapMin* heapMinVertice = removeMin(heapMin);
         int u = heapMinVertice->v; // Guarda o número do vértice extraído
 
-        // Passa por todos os vértices adjacentes de u (o vértice extraído)
+        // Passa por todos os vértices visitados de u (o vértice extraído)
         // e atualiza os valores de suas distâncias
-        struct VerticeListaAdj* adjacente = grafo->array[u].inicio;
-        while (adjacente != NULL)
+        struct VerticeListaAdj* visitado = grafo->array[u].inicio;
+        while (visitado != NULL)
         {
-            int v = adjacente->destino;
+            int v = visitado->destino;
 
             // Se a menor distância para v não está finalizada, e a distância para v
             // passando por u é menor que sua distância calculada anterior..
-            if (existeNoHeapMin(heapMin, v) && dist[u] != INT_MAX && adjacente->peso + dist[u] < dist[v])
+            if (existeNoHeapMin(heapMin, v) && dist[u] != INT_MAX && visitado->peso + dist[u] < dist[v])
             {
-                dist[v] = dist[u] + adjacente->peso;
+                dist[v] = dist[u] + visitado->peso;
 
                 // ..atualiza o valor da distância no heap min também
                 diminuiChave(heapMin, v, dist[v]);
             }
-            adjacente = adjacente->prox;
+            visitado = visitado->prox;
         }
     }
-    
-    t_fim = clock();
-    
+
+    t_fim = clock(); // Guarda o horario do fim da execução
+
     tempo = (t_fim, t_inicio)*1000/CLOCKS_PER_SEC; // Calcula o tempo de execução
 
-    // imprime as menores distâncias calculadas
-    //imprime(dist, V);
-    FILE *arquivoSaida;
-    arquivoSaida = abreArquivo('a',"C:\\Users\\Marcelo\\Documents\\Work\\new2\\Saida_inst_v1000_s1_d1.txt");
-    
-    // Imprime o tempo de execução
-    fprintf(arquivoSaida, "\nTempo total de execução: %f milissegundo(s).\n\n", tempo);
-    
-    // Imprime as menores distâncias calculadas
 
+    FILE *arquivoSaida;
+    arquivoSaida = abreArquivo('a',"C:\\Users\\Marcelo\\Documents\\Work\\new2\\saida\\saida_alue7229_d1.txt");
+
+    // Imprime o tempo de execução
+    fprintf(arquivoSaida, "\nTempo total de execucao: %f milissegundo(s).\n\n", tempo);
+
+    // Imprime as menores distâncias calculadas
     for (int i = 0; i < V; ++i)
         fprintf(arquivoSaida, "%d \t %d\n", i, dist[i]);
-        
-    fechaArquivo(arquivoSaida);  
+
+    fechaArquivo(arquivoSaida);
 }
 
 
 // Programa main para testar as funções acima
 int main()
 {
-        
+
     // testes com arquivos
 
-
 	FILE *arquivoEntrada;
-	//FILE *arquivoSaida;
+//	FILE *arquivoSaida;
     char prefixo[10];
     int valor1, valor2, valor3;
 	int V;
     struct Grafo* grafo = constroiGrafo(0);
 
-	arquivoEntrada = abreArquivo('l',"C:\\Users\\Marcelo\\iCloudDrive\\Work\\Casa - Pessoal\\0_Project CP\\Study\\MESTRADO\\UNIRIO\\2017\\MESTRADO\\Disciplinas\\Analise_e_Projeto_Algoritmos\\C\\instancias\\DijkstraImplementation\\Dijkstra_implem\\Test_Dijkstra_1\\test-set1\\test-set1\\inst_v1000_s1.dat");
-	//arquivoSaida = abreArquivo('a',"C:\\Users\\Marcelo\\iCloudDrive\\Work\\Casa - Pessoal\\0_Project CP\\Study\\MESTRADO\\UNIRIO\\2017\\MESTRADO\\Disciplinas\\Analise_e_Projeto_Algoritmos\\C\\instancias\\DijkstraImplementation\\Dijkstra_implem\\Test_Dijkstra_1\\Saida_dmxa\\Saida_dmxa0296.txt");
-     
+	arquivoEntrada = abreArquivo('l', "C:\\Users\\Marcelo\\Documents\\Work\\new2\\entrada\\Instancias_ALUE\\Instancias_ALUE\\alue7229.stp");
+
+
 	while(!feof(arquivoEntrada))
 	{
-                
+
         fscanf(arquivoEntrada, "%s %d %d %d" , &prefixo, &valor1, &valor2, &valor3);
         if(strcmp(prefixo, "V") == 0)
         {
@@ -362,14 +364,18 @@ int main()
         }
         if(strcmp(prefixo, "E") == 0){
             insereAresta(grafo, valor1, valor2, valor3);
-            //fprintf(arquivoSaida, "%s %d %d %d\n", &prefixo, &valor1, &valor2, &valor3);
-            //fprintf(arquivoSaida,"%d %d %d\n", valor1, valor2, valor3);
+            //insereAresta(grafo, valor2, valor1, valor3);
+            //fprintf(arquivoSaida, "%s %d %d %d\n", prefixo, valor1, valor2, valor3);
         }
-      
 	}
+
+
+
 	fechaArquivo(arquivoEntrada);
-    
-    dijkstra(grafo, 0);
-    
+//	fechaArquivo(arquivoSaida);
+
+
+    dijkstra(grafo, 0); // Executa o Dijkstra para o grafo
+
     return 0;
 }
