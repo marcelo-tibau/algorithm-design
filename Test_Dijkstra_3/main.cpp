@@ -1,329 +1,330 @@
-// C program for Dijkstra's shortest path algorithm for adjacency
-// list representation of graph
- 
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
+#include <string.h>
+#include <time.h>
+#include <conio.h>
 #include <iostream>
-#define MAX_N 10000
-using namespace std;
+#include <vector>
+#define INFINITO 1000000
 
-struct AdjListNode
+// Struct para representar um nó na lista de adjacência
+struct VerticeListaAdj
 {
-    int dest;
-    int weight;
-    struct AdjListNode* next;
+    int destino;
+    int peso;
+    struct VerticeListaAdj* prox;
 };
 
-// A structure to represent an adjacency list
-struct AdjList
+// Struct para representar a lista de adjacência
+struct ListaAdj
 {
-    struct AdjListNode *head;  // pointer to head node of list
+    struct VerticeListaAdj *inicio;  // ponteiro para o início da fila
 };
 
-// A structure to represent a graph. A graph is an array of adjacency lists.
-// Size of array will be V (number of vertices in graph)
-struct Graph
+// Struct para representar um grafo. Um grafo é um array de listas de adjacência.
+// O tamanho do array é V (conjunto de vértices do grafo)
+struct Grafo
 {
     int V;
-    struct AdjList* array;
+    struct ListaAdj* array;
 };
 
-// A utility function to create a new adjacency list node
-struct AdjListNode* newAdjListNode(int dest, int weight)
+// Função que cria um novo nó na lista de adjacência do grafo direcionado
+struct VerticeListaAdj* insereVerticeListaAdj(int destino, int peso)
 {
-    struct AdjListNode* newNode = (struct AdjListNode*) malloc(sizeof(struct AdjListNode));
-    newNode->dest = dest;
-    newNode->weight = weight;
-    newNode->next = NULL;
-    return newNode;
+    struct VerticeListaAdj* insereVertice = (struct VerticeListaAdj*) malloc(sizeof(struct VerticeListaAdj));
+    insereVertice->destino = destino;
+    insereVertice->peso = peso;
+    insereVertice->prox = NULL;
+    return insereVertice;
+   
 }
 
-// A utility function that creates a graph of V vertices
-struct Graph* createGraph(int V)
+
+// Função que cria um grafo com V vértices
+struct Grafo* constroiGrafo(int V)
 {
-    struct Graph* graph = (struct Graph*) malloc(sizeof(struct Graph));
-    graph->V = V;
-    
-    // Create an array of adjacency lists.  Size of array will be V
-    
-    graph->array = (struct AdjList*) malloc(V * sizeof(struct AdjList));
-    
-    // Initialize each adjacency list as empty by making head as NULL
+    struct Grafo* grafo = (struct Grafo*) malloc(sizeof(struct Grafo));
+    grafo->V = V;
+
+    // Cria um array de listas de adjacência.  O tamanho do array é igual a V
+    grafo->array = (struct ListaAdj*) malloc(V * sizeof(struct ListaAdj));
+
+     // Inicializa as listas de adjacência vazias e atribui o valor NULL ao nó inicial
     for (int i = 0; i < V; ++i)
-        graph->array[i].head = NULL;
-        
-        return graph;
+        grafo->array[i].inicio = NULL;
+
+    return grafo;
 }
 
-// Adds an edge to an undirected graph
-void addEdge(struct Graph* graph, int src, int dest, int weight)
+
+// Manipulação de arquivos
+FILE* abreArquivo(char modo, char caminho[30])
 {
-    // Add an edge from src to dest.  A new node is added to the adjacency
-    // list of src.  The node is added at the begining
-    struct AdjListNode* newNode = newAdjListNode(dest, weight);
-    newNode->next = graph->array[src].head;
-    graph->array[src].head = newNode;
-    
-    // Since graph is undirected, add an edge from dest to src also
-    newNode = newAdjListNode(src, weight);
-    newNode->next = graph->array[dest].head;
-    graph->array[dest].head = newNode;
+    FILE *arquivo;
+    switch(modo)
+    {
+        case 'g':
+            arquivo = fopen(caminho, "wt");
+            break;
+        case 'l':
+            arquivo = fopen(caminho, "rt");
+            break;
+        case 'a':
+            arquivo = fopen(caminho, "a");
+            break;
+    }
+    if(arquivo == NULL)
+	{
+        printf("Nao foi possivel abrir o arquivo");
+        exit(0);
+	}
+	return arquivo;
 }
 
-// Structure to represent a min heap node
-struct MinHeapNode
+void fechaArquivo(FILE* arquivo)
+{
+    fclose(arquivo);
+}
+
+
+
+// Inclui uma aresta em no grafo (direcionado)
+void insereAresta(struct Grafo* grafo, int origem, int destino, int peso)
+{
+    // Inclui uma aresta da origem ao destino. Um novo nó é adicionado à lista de adjacência
+    // da origem.  O nó é colocado no início da lista
+    struct VerticeListaAdj* insereVertice = insereVerticeListaAdj(destino, peso);
+    insereVertice->prox = grafo->array[origem].inicio;
+    grafo->array[origem].inicio = insereVertice;
+    
+     // Insere uma aresta de volta para tornar o grafo bi-direcional (ALUE e DMXA)
+    insereVertice = insereVerticeListaAdj(origem, peso);
+    insereVertice->prox = grafo->array[destino].inicio;
+    grafo->array[destino].inicio = insereVertice;
+}
+
+// Struct que representa o nó do vetor
+struct VerticeVectorMin
 {
     int  v;
     int dist;
 };
 
-// Structure to represent a min heap
-struct MinHeap
+// Struct que representa o vetor 
+struct VectorMin
 {
-    int size;      // Number of heap nodes present currently
-    int capacity;  // Capacity of min heap
-    int *pos;     // This is needed for decreaseKey()
-    struct MinHeapNode **array;
+    int tamanho;      // Número de nós que o vetor possui no momento
+    int capacidade;  // Capacidade do vetor
+    int *pos;     // Ponteiro necessário para a função diminuichave()
+    struct VerticeVectorMin **array;
 };
 
-// A utility function to create a new Min Heap Node
-
-struct MinHeapNode* newMinHeapNode(int v, int dist)
+// Função que cria um novo nó no vetor
+struct VerticeVectorMin* insereVerticeVectorMin(int v, int dist)
 {
-    struct MinHeapNode* minHeapNode = (struct MinHeapNode*) malloc(sizeof(struct MinHeapNode));
-    minHeapNode->v = v;
-    minHeapNode->dist = dist;
-    return minHeapNode;
+    struct VerticeVectorMin* vectorMinVertice =
+           (struct VerticeVectorMin*) malloc(sizeof(struct VerticeVectorMin));
+    vectorMinVertice->v = v;
+    vectorMinVertice->dist = dist;
+    return vectorMinVertice;
 }
 
-// A utility function to create a Min Heap
-struct MinHeap* createMinHeap(int capacity)
+// Função que cria o vetor
+struct VectorMin* constroiVectorMin(int capacidade)
 {
-    struct MinHeap* minHeap = (struct MinHeap*) malloc(sizeof(struct MinHeap));
-    minHeap->pos = (int *)malloc(capacity * sizeof(int));
-    minHeap->size = 0;
-    minHeap->capacity = capacity;
-    minHeap->array = (struct MinHeapNode**) malloc(capacity * sizeof(struct MinHeapNode*));
-    return minHeap;
+    struct VectorMin* vectorMin = (struct VectorMin*) malloc(sizeof(struct VectorMin));
+    vectorMin->pos = (int *)malloc(capacidade * sizeof(int));
+    vectorMin->tamanho = 0;
+    vectorMin->capacidade = capacidade;
+    vectorMin->array = (struct VerticeVectorMin**) malloc(capacidade * sizeof(struct VerticeVectorMin*));
+    return vectorMin;
 }
 
-// A utility function to swap two nodes of min heap. Needed for min heapify
-void swapMinHeapNode(struct MinHeapNode** a, struct MinHeapNode** b)
+
+// Função para checar se o vetor está vazio
+int ehVazia(struct VectorMin* vectorMin)
 {
-    struct MinHeapNode* t = *a;
-    *a = *b;
-    *b = t;
+    return vectorMin->tamanho == 0;
 }
 
-// A standard function to heapify at given idx
-// This function also updates position of nodes when they are swapped.
-// Position is needed for decreaseKey()
-
-void minHeapify(struct MinHeap* minHeap, int idx)
+// Função para extrair o menor nó do vetor
+struct VerticeVectorMin* removeMin(struct VectorMin* vectorMin)
 {
-    int smallest, left, right;
-    smallest = idx;
-    left = 2 * idx + 1;
-    right = 2 * idx + 2;
-    
-    if (left < minHeap->size && 
-    minHeap->array[left]->dist < minHeap->array[smallest]->dist )
-        smallest = left;
-        
-    if (right < minHeap->size &&
-    minHeap->array[right]->dist < minHeap->array[smallest]->dist )
-        smallest = right;
-        
-    if (smallest != idx)
-        {
-            // The nodes to be swapped in min heap
-            MinHeapNode *smallestNode = minHeap->array[smallest];
-            MinHeapNode *idxNode = minHeap->array[idx];
-            
-            // Swap positions
-            minHeap->pos[smallestNode->v] = idx;
-            minHeap->pos[idxNode->v] = smallest;
-            
-            // Swap nodes
-            swapMinHeapNode(&minHeap->array[smallest], &minHeap->array[idx]);
-            minHeapify(minHeap, smallest);
-        }
-}
-
-// A utility function to check if the given minHeap is ampty or not
-int isEmpty(struct MinHeap* minHeap)
-{
-    return minHeap->size == 0;
-}
-
-// Standard function to extract minimum node from heap
-struct MinHeapNode* extractMin(struct MinHeap* minHeap)
-{
-    if (isEmpty(minHeap))
+    if (ehVazia(vectorMin))
         return NULL;
-        
-        // Store the root node
-        struct MinHeapNode* root = minHeap->array[0];
-        
-        // Replace root node with last node
-        struct MinHeapNode* lastNode = minHeap->array[minHeap->size - 1];
-        minHeap->array[0] = lastNode;
-        
-        // Update position of last node
-        minHeap->pos[root->v] = minHeap->size-1;
-        minHeap->pos[lastNode->v] = 0;
-        
-        // Reduce heap size and heapify root
-        --minHeap->size;
-        minHeapify(minHeap, 0);
-        
-    return root;
+
+    // Guarda o nó raiz
+    struct VerticeVectorMin* raiz = vectorMin->array[0];
+
+    // Substitui o nó raiz pelo último nó
+    struct VerticeVectorMin* ultimoVertice = vectorMin->array[vectorMin->tamanho - 1];
+    vectorMin->array[0] = ultimoVertice;
+
+    // Atualiza a posição do último nó
+    vectorMin->pos[raiz->v] = vectorMin->tamanho-1;
+    vectorMin->pos[ultimoVertice->v] = 0;
+
+    // Reduz o tamanho do vetor e retorna sua raiz 
+    --vectorMin->tamanho;
+    //ultimoVertice(vectorMin, 0);
+
+    return raiz;
 }
 
-// Function to decreasy dist value of a given vertex v. This function
-// uses pos[] of min heap to get the current index of node in min heap
-
-void decreaseKey(struct MinHeap* minHeap, int v, int dist)
+// Função para decrementar o valor da distância de um vértice v. Esta função
+// usa pos[] do vetor para pegar o índice atual do nó 
+void diminuiChave(struct VectorMin* vectorMin, int v, int dist)
 {
-    // Get the index of v in  heap array
-    int i = minHeap->pos[v];
+    // Pega o índice de v no vector array
+    int i = vectorMin->pos[v];
+
+    // Pega o nó e atualiza o valor da distância
+    vectorMin->array[i]->dist = dist;
+
     
-    // Get the node and update its dist value
-    minHeap->array[i]->dist = dist;
-    
-    // Travel up while the complete tree is not hepified.
-    // This is a O(Logn) loop
-    
-    while (i && minHeap->array[i]->dist < minHeap->array[(i - 1) / 2]->dist)
-        {
-            // Swap this node with its parent
-            minHeap->pos[minHeap->array[i]->v] = (i-1)/2;
-            minHeap->pos[minHeap->array[(i-1)/2]->v] = i;
-            swapMinHeapNode(&minHeap->array[i],  &minHeap->array[(i - 1) / 2]);
-            
-            // move to parent index
-            i = (i - 1) / 2;
-        }
 }
 
-// A utility function to check if a given vertex
-// 'v' is in min heap or not
-bool isInMinHeap(struct MinHeap *minHeap, int v)
+// Função para checar se uma aresta
+// 'v' está no vetor ou não
+bool existeNoVectorMin(struct VectorMin *vectorMin, int v)
 {
-    if (minHeap->pos[v] < minHeap->size)
-        return true;
-        return false;
+   if (vectorMin->pos[v] < vectorMin->tamanho)
+     return true;
+   return false;
 }
 
-// A utility function used to print the solution
-void printArr(int dist[], int n)
+// Função para imprimir a solução
+void imprime(int dist[], int n)
 {
-    printf("Vertex   Distance from Source\n");
+    printf("Menor distância do nó a partir da origem\n");
     for (int i = 0; i < n; ++i)
         printf("%d \t\t %d\n", i, dist[i]);
 }
 
-// The main function that calulates distances of shortest paths from src to all
-// vertices. It is a O(ELogV) function
+// A função principal que calcula as distâncias dos caminhos mais curtos da origem para todos
+// os outros nós. É uma função com complexidade O(ELogV)
+void dijkstra(struct Grafo* grafo, int origem)
+{
+    // Variáveis para medir o tempo de execução
+    float tempo;
+    clock_t t_inicio, t_fim;
 
-void dijkstra(struct Graph* graph, int src)
-{int V = graph->V;// Get the number of vertices in graph
-int dist[V];      // dist values used to pick minimum weight edge in cut
-// minHeap represents set E
-struct MinHeap* minHeap = createMinHeap(V);
+    t_inicio = clock(); // Guarda o horário do início da execução
 
-// Initialize min heap with all vertices. dist value of all vertices 
-for (int v = 0; v < V; ++v)
+
+    int V = grafo->V;// Recebe o número de vértices do grafo
+    int dist[V];      // Valores das distâncias usadas para escolher a aresta de menor peso
+
+    // Vetor representa o conjunto E (arestas)
+    struct VectorMin* vectorMin = constroiVectorMin(V);
+
+    // Inicializa o vetor com todos os vértices. atribui o valor da distância de todos os vértices
+    for (int v = 0; v < V; ++v)
     {
         dist[v] = INT_MAX;
-        minHeap->array[v] = newMinHeapNode(v, dist[v]);
-        minHeap->pos[v] = v;
-        }
-        
-        // Make dist value of src vertex as 0 so that it is extracted first
-        minHeap->array[src] = newMinHeapNode(src, dist[src]);
-        minHeap->pos[src]   = src;
-        dist[src] = 0;
-        decreaseKey(minHeap, src, dist[src]);
-        
-        // Initially size of min heap is equal to V
-        minHeap->size = V;
-        
-        // In the following loop, min heap contains all nodes whose shortest distance is not yet finalized.
-        while (!isEmpty(minHeap))
+        vectorMin->array[v] = insereVerticeVectorMin(v, dist[v]);
+        vectorMin->pos[v] = v;
+    }
+
+    // Faz com que o valor da distância do vértice de origem seja igual a 0 para que seja extraído primeiro
+    vectorMin->array[origem] = insereVerticeVectorMin(origem, dist[origem]);
+    vectorMin->pos[origem]   = origem;
+    dist[origem] = 0;
+    diminuiChave(vectorMin, origem, dist[origem]);
+
+    // Inicializa o tamanho do vetor igual a V
+    vectorMin->tamanho = V;
+
+    // Vertice laço seguinte, vetor contém todos os nós
+    // para os quais o  caminho mais curto ainda não foi finalizado.
+    while (!ehVazia(vectorMin))
+    {
+        // Extrai o vértice com o menor valor de distância
+        struct VerticeVectorMin* vectorMinVertice = removeMin(vectorMin);
+        int u = vectorMinVertice->v; // Guarda o número do vértice extraído
+
+        // Passa por todos os vértices visitados de u (o vértice extraído)
+        // e atualiza os valores de suas distâncias
+        struct VerticeListaAdj* visitado = grafo->array[u].inicio;
+        while (visitado != NULL)
+        {
+            int v = visitado->destino;
+
+            // Se a menor distância para v não está finalizada, e a distância para v
+            // passando por u é menor que sua distância calculada anterior..
+            if (existeNoVectorMin(vectorMin, v) && dist[u] != INT_MAX && visitado->peso + dist[u] < dist[v])
             {
-                // Extract the vertex with minimum distance value
-                struct MinHeapNode* minHeapNode = extractMin(minHeap);
-                int u = minHeapNode->v; // Store the extracted vertex number
-                
-                // Traverse through all adjacent vertices of u (the extracted vertex) and update their distance values
-                struct AdjListNode* pCrawl = graph->array[u].head;
-                
-                while (pCrawl != NULL)
-                    {
-                        int v = pCrawl->dest;
-                        
-                        // If shortest distance to v is not finalized yet, and distance to v through u is less than its previously calculated distance
-                        if (isInMinHeap(minHeap, v) && dist[u] != INT_MAX &&
-                        pCrawl->weight + dist[u] < dist[v])
-                            {
-                                dist[v] = dist[u] + pCrawl->weight;
-                                
-                                // update distance value in min heap also
-                                
-                                decreaseKey(minHeap, v, dist[v]);
-                                }
-                                
-                                pCrawl = pCrawl->next;
-                    }
+                dist[v] = dist[u] + visitado->peso;
+
+                // ..atualiza o valor da distância no vetor também
+                diminuiChave(vectorMin, v, dist[v]);
             }
-            
-            // print the calculated shortest distance
-            
-            printArr(dist, V);
+            visitado = visitado->prox;
+        }
+    }
+
+    t_fim = clock(); // Guarda o horario do fim da execução
+
+    tempo = (t_fim, t_inicio)*1000/CLOCKS_PER_SEC; // Calcula o tempo de execução
+
+
+    FILE *arquivoSaida;
+    arquivoSaida = abreArquivo('a',"C:\\Users\\Marcelo\\Documents\\Work\\new2\\saida\\saida_inst_v100_s1_d3.txt");
+
+    // Imprime o tempo de execução
+    fprintf(arquivoSaida, "\nTempo total de execucao: %f milissegundo(s).\n\n", tempo);
+
+    // Imprime as menores distâncias calculadas
+    for (int i = 0; i < V; ++i)
+        fprintf(arquivoSaida, "%d \t %d\n", i, dist[i]);
+
+    fechaArquivo(arquivoSaida);
 }
 
-int main(int argc, char** argv)
+
+// Programa main para testar as funções acima
+int main()
 {
-        
-   FILE *inst_1_1;
-   char str[30];
-   unsigned int i = 0;
-   
-   // Open the files//
-   inst_1_1 = fopen("C:\\Users\\Marcelo\\iCloudDrive\\Work\\Casa - Pessoal\\0_Project CP\\Study\\MESTRADO\\UNIRIO\\2017\\MESTRADO\\Disciplinas\\Analise_e_Projeto_Algoritmos\\C\\instancias\\DijkstraImplementation\\Dijkstra_implem\\Test_Dijkstra_3\\Test_Dijkstra_3\\inst_v100_s1.dat" , "r");
-      if( inst_1_1 != NULL ) 
-   {
-      //accessing content stdout//
-      fscanf(inst_1_1, "%29s", str);
-      while(!feof(inst_1_1))
-        {  
-            i = i + 1;
-            printf("%-5d%-100s\n", i, str);   
-            fscanf(inst_1_1, "%29s", str);
-            struct AdjListNode;
-            struct AdjList;
-            struct Graph;
-            //struct AdjListNode* newAdjListNode(int dest, int weight);
-            //malloc(sizeof(struct AdjListNode));
-            //struct Graph* createGraph(int V);
-            //void addEdge(struct Graph* graph, int src, int dest, int weight);
-            struct MinHeapNode;
-            struct MinHeap;
-            //struct MinHeapNode* newMinHeapNode(int v, int dist);
-            //struct MinHeap* createMinHeap(int capacity);
-            //swapMinHeapNode(struct MinHeapNode** a, struct MinHeapNode** b);
-            //minHeapify(struct MinHeap* minHeap, int idx);
-            //struct MinHeapNode* extractMin(struct MinHeap* minHeap);
-            //decreaseKey(struct MinHeap* minHeap, int v, int dist);
-            //printArr(int dist[], int n);
+
+    // testes com arquivos
+
+	FILE *arquivoEntrada;
+//	FILE *arquivoSaida;
+    char prefixo[10];
+    int valor1, valor2, valor3;
+	int V;
+    struct Grafo* grafo = constroiGrafo(0);
+
+	arquivoEntrada = abreArquivo('l', "C:\\Users\\Marcelo\\Documents\\Work\\new2\\entrada\\test-set1\\test-set1\\inst_v100_s1.dat");
+
+
+	while(!feof(arquivoEntrada))
+	{
+
+        fscanf(arquivoEntrada, "%s %d %d %d" , &prefixo, &valor1, &valor2, &valor3);
+        if(strcmp(prefixo, "V") == 0)
+        {
+            V = valor1;
+
+            printf("Total de vertices do grafo: %d \n\n", V);
+            grafo = constroiGrafo(V);
         }
-        
-        fclose(inst_1_1);
-   }
-   fclose(inst_1_1);
-   
-      
-   return(0);
+        if(strcmp(prefixo, "E") == 0){
+            insereAresta(grafo, valor1, valor2, valor3);
+            //insereAresta(grafo, valor2, valor1, valor3);
+            //fprintf(arquivoSaida, "%s %d %d %d\n", prefixo, valor1, valor2, valor3);
+        }
+	}
+
+
+
+	fechaArquivo(arquivoEntrada);
+//	fechaArquivo(arquivoSaida);
+
+
+    dijkstra(grafo, 0); // Executa o Dijkstra para o grafo
+
+    return 0;
 }
