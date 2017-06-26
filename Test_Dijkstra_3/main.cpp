@@ -3,7 +3,6 @@
 #include <limits.h>
 #include <string.h>
 #include <time.h>
-#include <conio.h>
 #include <iostream>
 #include <vector>
 #define INFINITO 1000000
@@ -112,7 +111,7 @@ struct VerticeVectorMin
     int dist;
 };
 
-// Struct que representa o vetor 
+// Struct que representa o vetor
 struct VectorMin
 {
     int tamanho;      // Número de nós que o vetor possui no momento
@@ -149,48 +148,69 @@ int ehVazia(struct VectorMin* vectorMin)
     return vectorMin->tamanho == 0;
 }
 
+
 // Função para extrair o menor nó do vetor
 struct VerticeVectorMin* removeMin(struct VectorMin* vectorMin)
 {
     if (ehVazia(vectorMin))
         return NULL;
 
-    // Guarda o nó raiz
-    struct VerticeVectorMin* raiz = vectorMin->array[0];
+    // Variáveis para guardar o menor peso e sua posição
+    int menorP, posMenorP;
 
-    // Substitui o nó raiz pelo último nó
-    struct VerticeVectorMin* ultimoVertice = vectorMin->array[vectorMin->tamanho - 1];
-    vectorMin->array[0] = ultimoVertice;
+    // Variáveis para percorrer a lista de adjacência
+    struct VerticeVectorMin* minElem;
+    struct VerticeVectorMin* temp = vectorMin->array[0];//configura o primeiro vértice como o menor peso
+    menorP = vectorMin->array[0]->dist;
+    posMenorP = 0;
 
-    // Atualiza a posição do último nó
-    vectorMin->pos[raiz->v] = vectorMin->tamanho-1;
-    vectorMin->pos[ultimoVertice->v] = 0;
+    minElem = temp; // Começa considerando primeiro vértice como sendo o menor
 
-    // Reduz o tamanho do vetor e retorna sua raiz 
+    // Percorre todo o vetor
+    for(int i= 1; i < sizeof(vectorMin); i++){
+	    	temp = vectorMin->array[i]; // Guarda o vértice atual na variável temp
+	    	int pesoAtual = vectorMin->array[i]->dist; // Guarda o peso atual
+	    	// Se o peso do menor vetor até o momento for maior que o atual, faz a troca
+	    	if(menorP > pesoAtual){
+	      		minElem = temp;
+	      		menorP = pesoAtual;
+	      		posMenorP = i;
+	    	}
+    }
+
+    printf("posMenorP: %d\n", posMenorP);
+    //retira o elemento mínimo e move os próximos para a sua posição
+    for (int i = posMenorP; i < sizeof(vectorMin); i++ ){
+	  		vectorMin->array[i] = vectorMin->array[i+1];
+
+		}
+
+	// Reduz o tamanho do vetor
     --vectorMin->tamanho;
-    //ultimoVertice(vectorMin, 0);
-
-    return raiz;
+    printf("Tamanho do vetor: %d\n", vectorMin->tamanho);
+    // Retorna o menor elemento
+    return minElem;
 }
 
-// Função para decrementar o valor da distância de um vértice v. Esta função
-// usa pos[] do vetor para pegar o índice atual do nó 
+// Função para decrementar o valor da distância de um vértice v.
 void diminuiChave(struct VectorMin* vectorMin, int v, int dist)
 {
-    // Pega o índice de v no vector array
-    int i = vectorMin->pos[v];
+    // Faz a troca do valor do peso no vetor caso o valor seja menor
+    for(int i = 0; i < sizeof(vectorMin); i++){
+        if (v == vectorMin->array[i]->v){
+            if (dist < vectorMin->array[i]->dist){
+                vectorMin->array[i]->dist = dist;
+            }
+        }
+    }
 
-    // Pega o nó e atualiza o valor da distância
-    vectorMin->array[i]->dist = dist;
-
-    
 }
 
 // Função para checar se uma aresta
 // 'v' está no vetor ou não
 bool existeNoVectorMin(struct VectorMin *vectorMin, int v)
 {
-   if (vectorMin->pos[v] < vectorMin->tamanho)
+   if (vectorMin->pos[v] <= vectorMin->tamanho)
      return true;
    return false;
 }
@@ -220,7 +240,7 @@ void dijkstra(struct Grafo* grafo, int origem)
     // Vetor representa o conjunto E (arestas)
     struct VectorMin* vectorMin = constroiVectorMin(V);
 
-    // Inicializa o vetor com todos os vértices. atribui o valor da distância de todos os vértices
+    // Inicializa o vetor que guarda os resultados com todos os vértices. atribui o valor da distância de todos os vértices
     for (int v = 0; v < V; ++v)
     {
         dist[v] = INT_MAX;
@@ -244,6 +264,8 @@ void dijkstra(struct Grafo* grafo, int origem)
         // Extrai o vértice com o menor valor de distância
         struct VerticeVectorMin* vectorMinVertice = removeMin(vectorMin);
         int u = vectorMinVertice->v; // Guarda o número do vértice extraído
+        
+        printf("Elemento: %d - Peso: %d \n", vectorMinVertice->v, vectorMinVertice->dist);
 
         // Passa por todos os vértices visitados de u (o vértice extraído)
         // e atualiza os valores de suas distâncias
@@ -267,7 +289,7 @@ void dijkstra(struct Grafo* grafo, int origem)
 
     t_fim = clock(); // Guarda o horario do fim da execução
 
-    tempo = (t_fim, t_inicio)*1000/CLOCKS_PER_SEC; // Calcula o tempo de execução
+    tempo = (float)(t_fim - t_inicio)*1000/CLOCKS_PER_SEC; // Calcula o tempo de execução
 
 
     FILE *arquivoSaida;
@@ -292,7 +314,7 @@ int main()
 
 	FILE *arquivoEntrada;
 //	FILE *arquivoSaida;
-    char prefixo[10];
+    char prefixo[30];
     int valor1, valor2, valor3;
 	int V;
     struct Grafo* grafo = constroiGrafo(0);
