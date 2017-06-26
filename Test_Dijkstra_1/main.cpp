@@ -318,7 +318,7 @@ void dijkstra(struct Grafo* grafo, int origem)
 
     t_fim = clock(); // Guarda o horario do fim da execução
 
-    tempo = (float)(t_fim - t_inicio)*1000/CLOCKS_PER_SEC; // Calcula o tempo de execução
+    tempo = (float)(t_fim, t_inicio)*1000/CLOCKS_PER_SEC; // Calcula o tempo de execução
 
 
     FILE *arquivoSaida;
