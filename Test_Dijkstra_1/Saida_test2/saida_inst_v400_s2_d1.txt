@@ -1,5 +1,5 @@
 
-Tempo total de execução: 178.000000 milissegundo(s).
+Tempo total de execucao: 204.000000 milissegundo(s).
 
 0 	 0
 1 	 0
@@ -337,7 +337,7 @@ Tempo total de execução: 178.000000 milissegundo(s).
 333 	 0
 334 	 0
 335 	 0
-336 	 1
+336 	 0
 337 	 0
 338 	 0
 339 	 0
@@ -368,7 +368,7 @@ Tempo total de execução: 178.000000 milissegundo(s).
 364 	 0
 365 	 0
 366 	 0
-367 	 1
+367 	 0
 368 	 0
 369 	 0
 370 	 0
@@ -385,7 +385,7 @@ Tempo total de execução: 178.000000 milissegundo(s).
 381 	 0
 382 	 0
 383 	 0
-384 	 1
+384 	 0
 385 	 0
 386 	 0
 387 	 0
@@ -399,5 +399,5 @@ Tempo total de execução: 178.000000 milissegundo(s).
 395 	 0
 396 	 0
 397 	 0
-398 	 1
+398 	 0
 399 	 0

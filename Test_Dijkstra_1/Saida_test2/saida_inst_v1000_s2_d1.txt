@@ -1,5 +1,5 @@
 
-Tempo total de execução: 704.000000 milissegundo(s).
+Tempo total de execucao: 799.000000 milissegundo(s).
 
 0 	 0
 1 	 0
