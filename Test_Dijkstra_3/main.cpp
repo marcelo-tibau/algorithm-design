@@ -201,6 +201,7 @@ void diminuiChave(struct VectorMin* vectorMin, int v, int dist)
             if (dist < vectorMin->array[i]->dist){
                 vectorMin->array[i]->dist = dist;
             }
+            
         }
     }
 
@@ -291,9 +292,8 @@ void dijkstra(struct Grafo* grafo, int origem)
 
     tempo = (float)(t_fim - t_inicio)*1000/CLOCKS_PER_SEC; // Calcula o tempo de execução
 
-
-    FILE *arquivoSaida;
-    arquivoSaida = abreArquivo('a',"C:\\Users\\Marcelo\\Documents\\Work\\new2\\saida\\saida_inst_v100_s1_d3.txt");
+    FILE *arquivoSaida;    
+    arquivoSaida = abreArquivo('a',"C:\\Users\\Marcelo\\Documents\\Work\\new2\\saida\\saida_alue7229_d3.txt");
 
     // Imprime o tempo de execução
     fprintf(arquivoSaida, "\nTempo total de execucao: %f milissegundo(s).\n\n", tempo);
@@ -319,7 +319,7 @@ int main()
 	int V;
     struct Grafo* grafo = constroiGrafo(0);
 
-	arquivoEntrada = abreArquivo('l', "C:\\Users\\Marcelo\\Documents\\Work\\new2\\entrada\\test-set1\\test-set1\\inst_v100_s1.dat");
+	arquivoEntrada = abreArquivo('l', "C:\\Users\\Marcelo\\Documents\\Work\\new2\\entrada\\Instancias_ALUE\\Instancias_ALUE\\alue7229.stp");
 
 
 	while(!feof(arquivoEntrada))
