@@ -320,9 +320,8 @@ void dijkstra(struct Grafo* grafo, int origem)
 
     tempo = (float)(t_fim, t_inicio)*1000/CLOCKS_PER_SEC; // Calcula o tempo de execução
 
-
     FILE *arquivoSaida;
-    arquivoSaida = abreArquivo('a',"C:\\Users\\Marcelo\\Documents\\Work\\new2\\saida\\saida_inst_v100_s1_d1.txt");
+    arquivoSaida = abreArquivo('a',"C:\\Users\\Marcelo\\Documents\\Work\\new2\\saida\\saida_dmxa1801_d1.txt");
 
     // Imprime o tempo de execução
     fprintf(arquivoSaida, "\nTempo total de execucao: %f milissegundo(s).\n\n", tempo);
@@ -348,7 +347,7 @@ int main()
 	int V;
     struct Grafo* grafo = constroiGrafo(0);
 
-	arquivoEntrada = abreArquivo('l', "C:\\Users\\Marcelo\\Documents\\Work\\new2\\entrada\\test-set1\\test-set1\\inst_v100_s1.dat");
+	arquivoEntrada = abreArquivo('l', "C:\\Users\\Marcelo\\Documents\\Work\\new2\\entrada\\Instancias_DMXA\\Instancias_DMXA\\dmxa1801.stp");
 
 
 	while(!feof(arquivoEntrada))
